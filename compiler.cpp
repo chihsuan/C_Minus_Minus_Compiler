@@ -4,7 +4,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include "lib/Lexier.h"
+#include "lib/Token.h"
 
 using namespace std;
 
@@ -22,19 +24,23 @@ int main(int argc, char* argv[]){
 	//Start Lexial Analysis  
 	cout << "Start Lexial Analysis" << endl;	
 
-	
 	lexier = new Lexier(argv[1]);
-
 	lexier -> startParseTokens();
-	delete lexier;
+	
 	cout << "--Lexial Analysis success!" << endl;
-	
+
 	//Start Syntax Analysis
-	
+	vector<Token*> token_list = lexier -> getTokenList();	
+
+	for( vector<Token*>::iterator itr = token_list.begin(); itr != token_list.end(); ++itr){
+		cout << "Line " << itr[0] -> getLineNumber() << "\n" << \
+				right << setw(14) << itr[0] -> getCatergory() << " : "  << itr[0] -> getToken() << endl;
+	}
 	//Start Semantic Analysis
 	
 	//IR Gerneration
 	
 	//Code Gerneration
+	delete lexier;
 	return 0;
 }
