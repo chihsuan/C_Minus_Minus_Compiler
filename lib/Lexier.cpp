@@ -63,8 +63,9 @@ bool Lexier:: startParseTokens(){
 		}
 
 		// remove last ' '
-		line = line.substr(0, line.size() -1 );
-		
+		if( line[line.length()-1] == 13 ){
+			line = line.substr(0, line.length()-1);
+		}
 		// convert string to char* for split
 		char* tokenPtr = new char[line.length() + 1];
 		strcpy(tokenPtr, line.c_str() );
