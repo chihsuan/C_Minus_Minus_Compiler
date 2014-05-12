@@ -22,16 +22,18 @@ class Parser{
 
 	private:
 		map <Nonterminal*, vector<list<string> > > grammar;
+		map <string, Nonterminal*> non_terminals_map;
 		vector<Nonterminal*> non_terminals;
 
 		bool isTerminal(string term);
 		bool nullable(string non_terminal);
 		set<string> first(string non_terminal);
-		set<string> follow(string non_terminal);
+		void follow();
 		
-		void outputTermSet();
+		void outputSet();
 		void outputParingTable();
 		void outputParingTree();
+		map<Nonterminal*, vector<list<string> > >::iterator findGrammar(string non_terminal);
 };
 
 #endif

@@ -10,12 +10,14 @@ using namespace std;
 class Nonterminal{
 
 	public:
-		string non_terminal;
+		string term;
 		bool nullable;
 		set<string> first;
 		set<string> follow;
-
-		Nonterminal(string non_terminal);	
+		
+		void insertFollow(set<string> const set);
+		void insertFirst(set<string> const set);
+		Nonterminal(string term);	
 
 	private:
 };
