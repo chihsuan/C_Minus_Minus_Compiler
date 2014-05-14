@@ -4,7 +4,10 @@
 #include <map>
 #include <list>
 #include <set>
+#include <stack>
 #include "Nonterminal.h"
+#include "Token.h"
+#include "Node.h"
 
 using namespace std;
 
@@ -17,23 +20,25 @@ class Parser{
 		Parser(char* input_path);
 		~Parser();
 		void inputGrammar(char* input_path);
-		void startParsing();
-					
+		void startParsing(vector<Token*> tokens);
 
 	private:
-		map <Nonterminal*, vector<list<string> > > grammar;
-		map <string, Nonterminal*> non_terminals_map;
 		vector<Nonterminal*> non_terminals;
+		map <string, vector<list<string> > > grammar;
+		map <string, Nonterminal*> non_terminals_map;
+		map <string, map<string, int> > parsingTable;	
+		multimap <int, Node*> parsingTree;
 
-		bool isTerminal(string term);
 		bool nullable(string non_terminal);
 		set<string> first(string non_terminal);
 		void follow();
-		
+		void createParsingTree(vector<Token*> tokens);
+
+		int findTable(string& non_terminal, Token& token);
+		bool isTerminal(string term);
 		void outputSet();
 		void outputParingTable();
 		void outputParingTree();
-		map<Nonterminal*, vector<list<string> > >::iterator findGrammar(string non_terminal);
 };
 
 #endif

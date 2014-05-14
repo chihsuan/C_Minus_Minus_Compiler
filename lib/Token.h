@@ -9,12 +9,11 @@ using namespace std;
 class Token{
 	public:
 		Token(string token, string catergory, int line_number);
-		string getToken();
+		string getSymbol();
 		string getCatergory();
 		int getLineNumber();
-		
 	private:
-		string token;
+		string symbol;
 		string catergory;
 		int line_number;
 		

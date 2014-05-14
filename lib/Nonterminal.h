@@ -14,10 +14,12 @@ class Nonterminal{
 		bool nullable;
 		set<string> first;
 		set<string> follow;
+		int production_nullable;
 		
+
+		Nonterminal(string term);	
 		void insertFollow(set<string> const set);
 		void insertFirst(set<string> const set);
-		Nonterminal(string term);	
 
 	private:
 };
