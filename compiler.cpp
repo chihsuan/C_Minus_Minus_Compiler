@@ -9,6 +9,8 @@
 #include "lib/Token.h"
 #include "lib/Parser.h"
 #include "lib/Nonterminal.h"
+#include "lib/Semantic.h"
+#include "lib/InterCodeGenerator.h"
 
 using namespace std;
 
@@ -16,7 +18,8 @@ int main(int argc, char* argv[]){
 
 	Lexier* lexier;
 	Parser* parser;
-	
+	Semantic* semantic_analyzer;
+
 	if (argc < 2){
 		cout << "ERROR:argv[1] should be the input souce code!" << endl;
 		exit(1);
@@ -56,13 +59,16 @@ int main(int argc, char* argv[]){
 
 	cout << "--Parsing success!" << endl;
 	/* Start Semantic Analysis */
-	
-	/* IR Gerneration */
+	semantic_analyzer = new Semantic();
+	semantic_analyzer -> analysis( parser-> getParsingTree() );
+
+	/* IC Gerneration */
 	
 	/* Code Gerneration */
 
 
 	delete lexier;
 	delete parser;
+	delete semantic_analyzer;
 	return 0;
 }
