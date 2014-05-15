@@ -13,9 +13,7 @@ CodeGenerator:: ~CodeGenerator(){
 void CodeGenerator:: semanticRules(){
 
 }
-void CodeGenerator:: symbolTable(){
 
-}
 void CodeGenerator:: threeAddressCode(){
 
 }
@@ -27,10 +25,6 @@ void CodeGenerator:: machineCode(){
 
 }
 
-
-void CodeGenerator:: outputSymbol(){
-
-}
 void CodeGenerator:: outputQuadruples(){
 
 }

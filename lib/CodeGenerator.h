@@ -11,14 +11,11 @@ class CodeGenerator{
 		~CodeGenerator();
 	
 		void semanticRules();
-		void symbolTable();
 		void threeAddressCode();
 		void quadruples();
 		void machineCode();
 
 	private:
-		void outputSymbol();
 		void outputQuadruples();
 		void outputTMCode();
-
 };

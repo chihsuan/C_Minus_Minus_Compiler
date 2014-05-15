@@ -10,9 +10,11 @@ using namespace std;
 class Node{
 
 	public:
-		Node(int index, string token);
+		Node(int index, string token, string symbol, string catergory);
 		int index;
 		string token;
+		string symbol;
+		string catergory;
 	private:
 
 

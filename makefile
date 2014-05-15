@@ -1,5 +1,5 @@
-compiler: compiler.o Lexier.o Token.o  Parser.o Nonterminal.o Node.o CodeGenerator.o
-	g++ -g -o  compiler compiler.o Lexier.o Token.o Parser.o Nonterminal.o Node.o
+compiler: compiler.o Lexier.o Token.o  Parser.o Nonterminal.o Node.o Semantic.o CodeGenerator.o Semantic.o Symbol.o
+	g++ -g -o  compiler compiler.o Lexier.o Token.o Parser.o Nonterminal.o Node.o Semantic.o CodeGenerator.o Symbol.o
 compiler.o: compiler.cpp lib/Lexier.h lib/Parser.h
 	g++ -c  compiler.cpp
 Lexier.o: lib/Lexier.cpp lib/Lexier.h lib/Token.h 
@@ -14,5 +14,9 @@ Node.o: lib/Node.cpp lib/Node.h
 	g++ -c lib/Node.cpp
 CodeGenerator.o: lib/CodeGenerator.cpp lib/CodeGenerator.h
 	g++ -c lib/CodeGenerator.cpp
+Semantic.o: lib/Semantic.cpp lib/Semantic.h lib/Node.h
+	g++ -c lib/Semantic.cpp
+Symbol.o: lib/Symbol.cpp lib/Symbol.h
+	g++ -c lib/Symbol.cpp
 clean:
 	rm compiler *.o
