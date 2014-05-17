@@ -10,12 +10,8 @@ class CodeGenerator{
 		CodeGenerator();
 		~CodeGenerator();
 	
-		void semanticRules();
-		void threeAddressCode();
-		void quadruples();
 		void machineCode();
 
 	private:
-		void outputQuadruples();
 		void outputTMCode();
 };

@@ -1,5 +1,5 @@
-compiler: compiler.o Lexier.o Token.o  Parser.o Nonterminal.o Node.o Semantic.o InterCodeGenerator.o Semantic.o Symbol.o
-	g++ -g -o  compiler compiler.o Lexier.o Token.o Parser.o Nonterminal.o Node.o Semantic.o InterCodeGenerator.o Symbol.o
+compiler: compiler.o Lexier.o Token.o  Parser.o Nonterminal.o Node.o Semantic.o InterCodeGenerator.o Semantic.o Symbol.o Quadruples.o
+	g++ -g -o  compiler compiler.o Lexier.o Token.o Parser.o Nonterminal.o Node.o Semantic.o InterCodeGenerator.o Symbol.o Quadruples.o
 compiler.o: compiler.cpp lib/Lexier.h lib/Parser.h
 	g++ -c  compiler.cpp
 Lexier.o: lib/Lexier.cpp lib/Lexier.h lib/Token.h 
@@ -12,11 +12,13 @@ Nonterminal.o: lib/Nonterminal.cpp lib/Nonterminal.h
 	g++ -c lib/Nonterminal.cpp
 Node.o: lib/Node.cpp lib/Node.h
 	g++ -c lib/Node.cpp
-InterCodeGenerator.o: lib/InterCodeGenerator.cpp lib/InterCodeGenerator.h
+InterCodeGenerator.o: lib/InterCodeGenerator.cpp lib/InterCodeGenerator.h lib/Quadruples.h
 	g++ -c lib/InterCodeGenerator.cpp
 Semantic.o: lib/Semantic.cpp lib/Semantic.h lib/Node.h
 	g++ -c lib/Semantic.cpp
 Symbol.o: lib/Symbol.cpp lib/Symbol.h
 	g++ -c lib/Symbol.cpp
+Quadruples.o: lib/Quadruples.cpp lib/Quadruples.h
+	g++ -c lib/Quadruples.cpp
 clean:
 	rm compiler *.o
