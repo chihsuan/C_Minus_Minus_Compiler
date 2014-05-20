@@ -12,6 +12,8 @@ Semantic:: Semantic(){
 void Semantic:: analysis(multimap<int, Node> parsingTree){
 
 
+	//build Semantic rule
+
 	// build symbol table check the decl vaild
 	buildSymbolTable(parsingTree);
 }
@@ -23,6 +25,7 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 	int scope = 0;
 	int scopeNumber = 0;
 	bool isdecl = false;
+	bool isFuncDecl = false;
 	stack<string> stream_stack;
 
 	//iterator parsingTree to check what scope is and if decl vaild
@@ -36,6 +39,9 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 			if( !tableInsert(stream_stack, symbol) ){
 				cout << "Error variable has already declared" << endl; 
 				exit(1);
+			}
+			if( isFuncDecl ){
+				scope = scopeNumber + 1;
 			}
 			symbolTable.insert( make_pair(order, Symbol(symbol, token, type, scope)) );
 			stream_stack.push( symbol );
@@ -52,6 +58,7 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 			type = symbol;
 		}
 		else if( token.compare("{") == 0 ){
+			isFuncDecl = false;
 			scope = ++scopeNumber;
 			stream_stack.push( symbol );
 		}
@@ -61,11 +68,15 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 				stream_stack.pop();
 				scope--;
 			}
+			stream_stack.pop();
 		
 			if(  !findSymbol(stream_stack, "{") ){
 				scope = 0;
 			}
 		} 
+		else if( token.compare("FunDecl") == 0){
+			isFuncDecl = true;
+		}
 	}
 	outputSymbolTable();
 }
