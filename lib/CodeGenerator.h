@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
+#include "Quadruples.h"
 
 using namespace std;
 
@@ -10,7 +12,7 @@ class CodeGenerator{
 		CodeGenerator();
 		~CodeGenerator();
 	
-		void machineCode();
+		void gernerateCode(vector<Quadruples> quadruples);
 
 	private:
 		void outputTMCode();

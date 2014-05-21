@@ -11,8 +11,11 @@ CodeGenerator:: ~CodeGenerator(){
 
 }
 
-void CodeGenerator:: machineCode(){
+void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 
+
+	for(vector<Quadruples>::iterator itr = quadruples.begin(); itr != quadruples.end(); ++itr ){
+	}
 
 }
 

@@ -146,10 +146,11 @@ void InterCodeGenerator:: createQuadruples(queue<Node> post_expr){
 			ss <<  name_index++;
 			
 			if( post_expr.front().symbol.compare("=") == 0 ){
-				quadruples.push_back( Quadruples(post_expr.front().symbol, "", tmp.symbol, "t" + ss.str() ) );
+				quadruples.push_back( Quadruples(post_expr.front().symbol, tmp.symbol, "",  "t" + ss.str() ) );
+				quadruples.push_back( Quadruples(post_expr.front().symbol, "t" +  ss.str(), "",  pr_stack.top().symbol ) );
 			}
 			else{
-				quadruples.push_back( Quadruples(post_expr.front().symbol, pr_stack.top().symbol, tmp.symbol, "t" + ss.str() ) );
+				quadruples.push_back( Quadruples(post_expr.front().symbol,  pr_stack.top().symbol, tmp.symbol,  "t" + ss.str() ) );
 			}
 			pr_stack.pop( );
 			pr_stack.push(Node(0, "t" + ss.str(), "t" + ss.str(), " "));
@@ -172,7 +173,12 @@ void InterCodeGenerator:: outputQuadruples(){
 	}
 	
 	for(vector<Quadruples>::iterator itr = quadruples.begin(); itr != quadruples.end(); ++itr ){
-		outputfile << left << setw(4) <<  itr-> getOp()  <<  setw(5) << itr -> getResult()  << setw(5) << itr-> getArg1() << " " \
-				<< itr -> getArg2() <<  endl;
+		outputfile << left << setw(4) <<  itr-> getOp()  << setw(5) << itr-> getArg1() << " " \
+				<< setw(5) << itr -> getArg2() << setw(5) <<  itr -> getResult()   << endl;
 	}
+}
+
+
+vector<Quadruples> InterCodeGenerator:: getQuadruples(){
+	return quadruples;	
 }

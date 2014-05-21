@@ -19,14 +19,15 @@ class InterCodeGenerator{
 		InterCodeGenerator();
 		~InterCodeGenerator();
 		void startGenerate(multimap<int, Node> parsingTree);
+		vector<Quadruples> getQuadruples();
 
 	private:
 		int name_index; 
 		vector<Quadruples> quadruples;	
-		
+		vector<queue<string> > expr_v_queue;
 		queue<Node> postfix(queue<Node> expr);
+		
 		void createQuadruples(queue<Node> post_expr);
 		int priority(Node node);
-		vector<queue<string> > expr_v_queue;
 		void outputQuadruples();
 };

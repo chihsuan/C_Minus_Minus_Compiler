@@ -11,7 +11,7 @@
 #include "lib/Nonterminal.h"
 #include "lib/Semantic.h"
 #include "lib/InterCodeGenerator.h"
-
+#include "lib/CodeGenerator.h"
 using namespace std;
 
 int main(int argc, char* argv[]){
@@ -19,7 +19,10 @@ int main(int argc, char* argv[]){
 	Lexier* lexier;
 	Parser* parser;
 	Semantic* semantic_analyzer;
+	InterCodeGenerator* interCodeGenerator;
+	CodeGenerator* codeGenerator;
 
+	/*  file input path */
 	if (argc < 2){
 		cout << "ERROR:argv[1] should be the input souce code!" << endl;
 		exit(1);
@@ -29,46 +32,41 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 
-	cout << "Start compile input_file = " << argv[1] << endl;
-	
-	/* Start Lexial Analysis */
-	cout << "Start Lexial Analysis" << endl;	
+	cout << "Start compile .c file = " << argv[1] << "grammar = " \
+		 <<	argv[2] << endl;
 
+
+	/* Start Lexial Analysis */
+	cout << "1.Start Lexial Analysis" << endl;	
 	lexier = new Lexier(argv[1]);
 	lexier -> startParseTokens();
-	
 	cout << "--Lexial Analysis success!" << endl;
 
-	
-	//*********************************/
-	vector<Token*> token_list = lexier -> getTokenList();	
-
-	/*int line = 0;
-	for( vector<Token*>::iterator itr = token_list.begin(); itr != token_list.end(); ++itr){
-		if( line != itr[0] -> getLineNumber() ){
-			line = itr[0] -> getLineNumber();
-			cout << "Line " << line << endl;
-		}
-		cout << left << "\t" << setw(13) << itr[0] -> getCatergory() << " : "  << itr[0] -> getToken() << endl;
-	}*/
-
 	/* Start Syntax Analysis */
-	cout << "Start Syntax Analysis" << endl;
+	cout << "2.Start Syntax Analysis" << endl;
 	parser = new Parser(argv[2]);
 	parser -> startParsing( lexier-> getTokenList() );
+	cout << "--parsering success!" << endl;
+	delete lexier;
 
-	cout << "--Parsing success!" << endl;
 	/* Start Semantic Analysis */
+	cout << "3.Start Semantic Analysis" << endl;
 	semantic_analyzer = new Semantic();
 	semantic_analyzer -> analysis( parser-> getParsingTree() );
-
-	/* IC Gerneration */
-	
-	/* Code Gerneration */
-
-
-	delete lexier;
-	delete parser;
+	cout << "--Semantic success!" << endl;
 	delete semantic_analyzer;
+		
+	/* IC Gerneration */
+	interCodeGenerator = new InterCodeGenerator();
+	interCodeGenerator -> startGenerate( parser -> getParsingTree() );
+	delete parser;
+
+	/* Code Gerneration */
+	codeGenerator = new CodeGenerator();
+ 	codeGenerator -> gernerateCode( interCodeGenerator-> getQuadruples() );
+	
+
+	delete interCodeGenerator;
+	delete codeGenerator;
 	return 0;
 }
