@@ -7,7 +7,7 @@ using namespace std;
 
 
 InterCodeGenerator:: InterCodeGenerator()
-	:name_index(0)
+	:name_index(0) // temperary name index for quadruples
 {
 
 }
@@ -17,10 +17,10 @@ InterCodeGenerator:: ~InterCodeGenerator(){
 
 void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 
-	bool in_Expr = false;
-	int Expr_index = -1;
-	queue<Node> tmp;
-	queue<Node> postfix_return;
+	bool in_Expr = false;  // is in Expr block ?
+	int Expr_index = -1;   // record the Expr index
+	queue<Node> tmp;       // tmp stack push expr symbol    
+	queue<Node> postfix_expr;
 
 	/* ParsingTree ->  produce three address code by postfix */
 	for(multimap<int, Node>::iterator itr = parsingTree.begin(); itr != parsingTree.end(); ++ itr){
@@ -29,22 +29,33 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 		string symbol =  itr -> second.symbol;
 		string catergory = itr -> second.catergory;
 		
+		
 		if( !in_Expr && token.compare("Expr") == 0 ){
-			in_Expr = true;
+
+			// set flag and record index
+			in_Expr = true;                     
 			Expr_index = itr -> second.index;
 		}
 		else if( itr -> second.index == Expr_index ){
+
+			// exit expr block unset flag and index
 			in_Expr = false;
 			Expr_index = -1;
-			postfix_return = postfix(tmp);
+
+			// converts to  postfix  format
+			postfix_expr = postfix(tmp);
 			
+			// clear
 			while( !tmp.empty() ){
 				tmp.pop();
 			}
-			createQuadruples(postfix_return);
+
+			//create quadruples
+			createQuadruples(postfix_expr);
 		
 		}
 
+		// in expr block, push symbol 
 		if( ( catergory.compare("Identifier") == 0 || catergory.compare("Operator")  == 0 \
 								|| catergory.compare("Number")  == 0) || catergory.compare("ch") == 0   && in_Expr ){
 			tmp.push( itr -> second );
@@ -61,6 +72,7 @@ queue<Node> InterCodeGenerator:: postfix(queue<Node> expr){
 
     while( !expr.empty() ) { 
         
+        // operator, priority push
 		if ( expr.front().catergory.compare("Operator") == 0 ) {
 			while (!operator_stack.empty() && priority( operator_stack.top() ) \
 							<= priority( expr.front() )) {
@@ -68,11 +80,13 @@ queue<Node> InterCodeGenerator:: postfix(queue<Node> expr){
                 operator_stack.pop();
             }
             operator_stack.push( expr.front() );
-        } 
+        }
+        // push and push until get ')' 
         else if ( expr.front().symbol.compare("(") == 0 ) {
 
             operator_stack.push( expr.front() );
         } 
+        // pop until get '('
         else if ( expr.front().symbol.compare(")") == 0 ) {
 
             while ( operator_stack.top().symbol.compare("(") != 0 ) {
@@ -82,10 +96,14 @@ queue<Node> InterCodeGenerator:: postfix(queue<Node> expr){
 			operator_stack.pop();
 		}
 		else{
+			// push Identifier, char, num
 			result.push( expr.front() );
 		}
-			expr.pop();
+
+		// next element
+		expr.pop();
 	}
+
 	while(!operator_stack.empty()){
 		result.push( operator_stack.top() );
 		operator_stack.pop();
@@ -95,6 +113,8 @@ queue<Node> InterCodeGenerator:: postfix(queue<Node> expr){
 }
 int InterCodeGenerator:: priority(Node node){
 
+
+	// return postfix priority 
 	string op = node.symbol;
 
 	if( op.size() == 1){
@@ -138,33 +158,47 @@ void InterCodeGenerator:: createQuadruples(queue<Node> post_expr){
 	stringstream ss;
 
 	while( !post_expr.empty() ){
+		
+		// operator get two element in pr_stack and  push to quadruples
 		if ( post_expr.front().catergory.compare("Operator") == 0 ) {
+
+			// int to str clear buffer
 			ss.str("");
 			ss.clear();
+			ss <<  name_index++;
+
+			// get first element
 			Node tmp = pr_stack.top();
 			pr_stack.pop();
-			ss <<  name_index++;
-			
+		
+			// is assign ( arg2 empty )  
 			if( post_expr.front().symbol.compare("=") == 0 ){
 				quadruples.push_back( Quadruples(post_expr.front().symbol, tmp.symbol, "",  "t" + ss.str() ) );
 				quadruples.push_back( Quadruples(post_expr.front().symbol, "t" +  ss.str(), "",  pr_stack.top().symbol ) );
+			
 			}
+			// is ALU operate
 			else{
 				quadruples.push_back( Quadruples(post_expr.front().symbol,  pr_stack.top().symbol, tmp.symbol,  "t" + ss.str() ) );
 			}
 			pr_stack.pop( );
+			// push temperary name
 			pr_stack.push(Node(0, "t" + ss.str(), "t" + ss.str(), " "));
 		}
 		else{
+			// push identifiy, char, num
 			pr_stack.push( post_expr.front() );
 		}
 
+		// next element
 		post_expr.pop();
 	}
 }
 
 void InterCodeGenerator:: outputQuadruples(){
 	
+
+	// output the InterCodeGenerator Quadruples result 
 	ofstream outputfile("output/quadruples.txt", ios:: out);
 
 	if(!outputfile){
@@ -178,7 +212,7 @@ void InterCodeGenerator:: outputQuadruples(){
 	}
 }
 
-
+// let other class can get quadruples
 vector<Quadruples> InterCodeGenerator:: getQuadruples(){
 	return quadruples;	
 }
