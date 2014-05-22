@@ -34,34 +34,45 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 		string const & token =  itr -> second.token;
 		string symbol =  itr -> second.symbol;
 		
+		// variable is decl
 		if( token.compare("id") == 0 && isdecl ){
+
 			isdecl = false;	
+			// insert variable to decl table to check whether it is decl
 			if( !tableInsert(stream_stack, symbol) ){
 				cout << "Error variable has already declared" << endl; 
 				exit(1);
 			}
+			// is fucntion decl so add scope first 
 			if( isFuncDecl ){
 				scope = scopeNumber + 1;
 			}
+			// insert  to result
 			symbolTable.insert( make_pair(order, Symbol(symbol, token, type, scope)) );
 			stream_stack.push( symbol );
 			
 		}
+		// variable is used
 		else if( itr -> second.catergory.compare("Identifier") == 0 ){
+			
+			// to check use is vaild	
 			if( !findSymbol(stream_stack, symbol) ){
 				cout << "Error variable use before declare" << endl; 
 				exit(1);
 			}
 		}
+		// get decl type
 		else if( token.compare("Type") == 0 ){
 			isdecl = true;
 			type = symbol;
 		}
+		// enter next scope
 		else if( token.compare("{") == 0 ){
 			isFuncDecl = false;
 			scope = ++scopeNumber;
 			stream_stack.push( symbol );
 		}
+		// exit scope
 		else if( token.compare("}") == 0 ){
 			
 			while( stream_stack.top().compare("{") != 0 ){
@@ -74,6 +85,7 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 				scope = 0;
 			}
 		} 
+		// is function decl
 		else if( token.compare("FunDecl") == 0){
 			isFuncDecl = true;
 		}
@@ -83,7 +95,7 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 
 bool Semantic:: findSymbol(stack<string> input, string symbol){
 	
-
+	// pop and find if symbol is decl in scope
 	while( !input.empty() ){
 		if( input.top().compare(symbol) == 0 ){
 			return true;
@@ -95,6 +107,7 @@ bool Semantic:: findSymbol(stack<string> input, string symbol){
 
 bool Semantic:: tableInsert(stack<string> input, string symbol ){
 
+	// pop and find if symbol is decl in scope
 	while( !input.empty() && input.top().compare("{") != 0   ){
 		
 		if(input.top().compare(symbol) == 0){
@@ -106,6 +119,8 @@ bool Semantic:: tableInsert(stack<string> input, string symbol ){
 }
 
 void Semantic:: outputSymbolTable(){
+
+	// output the result
 
 	ofstream outputfile("output/symbol.txt", ios:: out);
 
