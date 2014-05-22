@@ -17,78 +17,136 @@ CodeGenerator:: ~CodeGenerator(){
 
 void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 		
+	int quadruples_count = 0;
 	string op;
 	string arg1;
 	string arg2;
 	string result;
 	string finalString;
-	ofstream& output = getOfStream();
+	stack<int> jf_count_stack;
+	stack<int> jp_count_stack;
+	stack<int> jp_pos_stack;
+	stack<int> jf_pos_stack;
+	stack<int> until_jf_stack;
+	stack<int> until_jp_stack;
+	stack<string> jf_tmp_stack;
 
 	// iterator quadruples to convert to machine code
 	for(vector<Quadruples>::iterator itr = quadruples.begin(); itr != quadruples.end(); ++itr ){
 		
+		quadruples_count += 1;
 		op = itr -> getOp();
 		arg1 = itr-> getArg1();
 		arg2 = itr-> getArg2();
-		result = itr-> getResult();
+		result = itr -> getResult();	
+		
+		// add if jmp
+		if( quadruples_count == until_jf_stack.top() ){
+			machine_code.insert( machine_code.begin() + jf_pos_stack.top(), fromatCode( jf_count_stack.top(), \
+									"JEQ", getReg( jf_tmp_stack.top() ), toString(count) + "(0)", "" ) );	
+			jf_tmp_stack.pop();
+			jf_pos_stack.pop();
+			jf_count_stack.pop();
+			until_jf_stack.pop();
+		}
+		
+		// add end if jmp
+		if( quadruples_count == until_jp_stack.top() ){
+			machine_code.insert( machine_code.begin() + jp_pos_stack.top(), fromatCode( jp_count_stack.top(), "LDA", "7", toString(count) + "(0)", "" ) );	
+			jp_pos_stack.pop();
+			jp_count_stack.pop();
+			until_jp_stack.pop();
+		}
 		
 		// is assign digit
-		if( itr-> getArg2().size() == 0  && isdigit( itr-> getArg1()[0] ) ){
-			output << count++ << ": " << "LDC " <<  getReg(arg1) << "," << arg1 + "(0)" << endl;
-			output << count++ << ": "  << "LDC 0,0(0)" << endl;
-			output << count++ << ": " << "ST " << getReg(arg1) << "," << getMem( result )  << "(0)" << endl;
+		if( op.compare("=") == 0  && isdigit( itr-> getArg1()[0] ) ){
+			machine_code.push_back( fromatCode(count++, "LDC", getReg(arg1), arg1 + "(0)", "" ) );
+			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "") );
+			machine_code.push_back( fromatCode(count++, "ST", getReg(arg1), getMem(result) + "(0)", "") ) ;
 			finalString = arg1;
 		}
 		// is assign identifier
-		else if( itr -> getArg2().size() == 0 ){
-			output << count++ << ": " << "LD " << getReg(arg1) << ","  << getMem( arg1 ) << "(0)" << endl;
-			output << count++ << ": "  << "LDC 0,0(0)" << endl;
-			output << count++ << ": " << "ST " << getReg(arg1) << "," << getMem( result )  << "(0)" << endl;
+		else if( op.compare("=") == 0 ){
+			machine_code.push_back( fromatCode(count++, "LD",  getReg(arg1), getMem(arg1) + "(0)" , "" ) );
+			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
+			machine_code.push_back( fromatCode(count++, "ST",  getReg(arg1), getMem(result) + "(0)", "" ) );
 			finalString = arg1;
 		}
+		//  jmp if 
+		else if( op.compare("jf") == 0){
+			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "") );
+			jf_count_stack.push( count++ );
+			jf_tmp_stack.push( arg2 );
+			jf_pos_stack.push( machine_code.size()  );
+			until_jf_stack.push( atoi( arg1.c_str() ) );
+		} // jmp
+		else if( op.compare("jp") == 0){
+			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "") );
+			jp_count_stack.push( count++ );
+			jp_pos_stack.push( machine_code.size()  );
+			until_jp_stack.push( atoi( arg1.c_str() ) );
+		}	
 		// is operator and ALU operate
 		else{
-			
+		
 			// lw arg1
 			if( isdigit( itr-> getArg1()[0] ) ){
-				output << count++ << ": " << "LDC " << getReg(arg1) << "," << arg1 + "(0)" << endl;
+				machine_code.push_back( fromatCode(count++, "LDC", getReg(arg1), arg1 + "(0)", "" ) );
 			}
 			else{
-				output << count++ << ": "  << "LDC 0,0(0)" << endl;
-				output << count++ << ": " << "LD " << getReg(arg1) << ","  << getMem( arg1 ) << "(0)" << endl;
+				machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
+				machine_code.push_back( fromatCode(count++, "LD",  getReg(arg1), getMem(arg1) + "(0)" , "" ) );
 			}
 
-			// lw arg2
+			// arg2 lw digit
 			if( isdigit( itr-> getArg2()[0] ) ){
-				output << count++ << ": " << "LDC " << getReg( arg2 ) << "," << arg1 + "(0)" << endl;
+				machine_code.push_back( fromatCode(count++, "LDC", getReg(arg2), arg2 + "(0)", "" ) );
 			}
+			// arg2 lw identifier
 			else{
-				output << count++ << ": "  << "LDC 0,0(0)" << endl;
-				output << count++ << ": " << "LD " << getReg(arg2) << "," << getMem( arg2 ) << "(0)" << endl;
+				machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
+				machine_code.push_back( fromatCode(count++, "LD",  getReg(arg2), getMem(arg2) + "(0)" , "" ) );
 			}
 
 			// alu operater
-			output << count++ << ": " << getOpCode( op ) + " "  << getReg(result) << ","  << getReg(arg1)  << "," << getReg(arg2) << endl;
-			output << count++ << ": " << "ST " << getReg(result) << "," << getMem( result ) << "(0)" << endl; 
+			machine_code.push_back( fromatCode(count++, getOpCode(op),  getReg(result), getReg(arg1) , getReg(arg2)) );
+			machine_code.push_back( fromatCode(count++, "ST",  getReg(result), getMem(result) + "(0)", "" ) );
+			
 			finalString = result;
-		}	
+		}
 	}
 
+	while( !until_jf_stack.empty() ){
+			machine_code.insert( machine_code.begin() + jf_pos_stack.top(), fromatCode( jf_count_stack.top() , \
+									"JEQ", getReg( jf_tmp_stack.top()  ), toString(count) + "(0)", "" ) );	
+			jf_tmp_stack.pop();
+			jf_pos_stack.pop();
+			jf_count_stack.pop();
+			until_jf_stack.pop();
+	}
+	while ( !until_jp_stack.empty() ){
+			machine_code.insert( machine_code.begin() + jp_pos_stack.top(), fromatCode( jp_count_stack.top(), "LDA", "7", toString(count) + "(0)", "" ) );	
+			jp_pos_stack.pop();
+			jp_count_stack.pop();
+			until_jp_stack.pop();
+	} 
+
+
 	// print the last result and stop machine
-	output << count++ << ": " << "OUT " << getReg(finalString) << ",0,0"<< endl; 
-	output << count++ << ": HALT 1,0,0"<< endl; 
+	machine_code.push_back( fromatCode(count++, "OUT",  getReg(finalString), "0", "0" ) );
+	machine_code.push_back( fromatCode(count++, "HALT",  "1", "0", "0" ) );
 	
-	output.close();
+	outputFile();
 }
 
 
 // get available reg or it already in reg
-int CodeGenerator:: getReg(string symbol){
+string CodeGenerator:: getReg(string symbol){
 	
 	map<string, int>::iterator itr =  str_reg.find(symbol);
 
 	if( itr != str_reg.end() ){
-		return itr -> second;
+		return toString(itr -> second);
 	}
 	else{
 		reg += 1;
@@ -102,23 +160,23 @@ int CodeGenerator:: getReg(string symbol){
 		reg_queue.push( symbol );
 	}
 
-	return reg;
+	return toString(reg);
 }
 
 
 
 // get available mem space
-int CodeGenerator:: getMem(string symbol){
+string CodeGenerator:: getMem(string symbol){
 		
 
 	map<string, int>::iterator itr =  variable_mem.find(symbol);
 
 	if( itr != variable_mem.end() ){
-		return itr -> second;
+		return toString( itr -> second );
 	}
 	else{
 		variable_mem.insert( make_pair(symbol, set_mem) );
-		return set_mem++;
+		return toString( set_mem++ );
 	}
 
 
@@ -175,15 +233,36 @@ string CodeGenerator:: getOpCode(string op){
 }
 
 
-ofstream& CodeGenerator:: getOfStream(){
+void CodeGenerator:: outputFile(){
 
 	/*  output stream for write the result */
-    static ofstream outputFile( "output/code.tm", ios::out);
+    ofstream output( "output/code.tm", ios::out);
 
-	if (!outputFile){
+	if (!output){
 		cerr << "File could not be opened" << endl;
 		exit(1);
 	}
 
-	return outputFile;
+	for( vector<string>:: iterator itr = machine_code.begin(); itr != machine_code.end(); ++itr){
+	
+		//cout << *itr << endl;
+		output <<  *itr << endl;
+	}
+
+	output.close();
+}
+
+string CodeGenerator:: toString(int integer){
+	stringstream ss;
+	ss << integer;
+	return ss.str();
+}
+string CodeGenerator:: fromatCode(int count, string op, string arg1, string arg2, string arg3){
+	
+	if( arg3.size() > 0 ){
+		return toString(count) + ": " + op + " " + arg1 + "," + arg2 + "," + arg3;
+	}
+	else{
+		return toString(count) + ": " + op + " " + arg1 + "," + arg2;
+	}
 }

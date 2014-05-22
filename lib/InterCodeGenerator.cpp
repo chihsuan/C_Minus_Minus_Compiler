@@ -17,18 +17,28 @@ InterCodeGenerator:: ~InterCodeGenerator(){
 
 void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 
+
 	bool in_Expr = false;  // is in Expr block ?
 	int Expr_index = -1;   // record the Expr index
-	queue<Node> tmp;       // tmp stack push expr symbol    
+	bool in_while = false;
+	int while_index = -1;
+
+	stringstream ss;
+	queue<Node> tmp;      // tmp stack push expr symbol    
 	queue<Node> postfix_expr;
+	stack<int> while_jmp_stack;
+	stack<int> if_jmp_stack;
+	stack<string> if_tmp_stack;
+	stack<int> else_jmp_stack;
+	stack<int> else_index;
 
 	/* ParsingTree ->  produce three address code by postfix */
 	for(multimap<int, Node>::iterator itr = parsingTree.begin(); itr != parsingTree.end(); ++ itr){
-	
+		
 		string const & token =  itr -> second.token;
 		string symbol =  itr -> second.symbol;
 		string catergory = itr -> second.catergory;
-		
+		int index = itr -> second.index;
 		
 		if( !in_Expr && token.compare("Expr") == 0 ){
 
@@ -36,7 +46,7 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 			in_Expr = true;                     
 			Expr_index = itr -> second.index;
 		}
-		else if( itr -> second.index == Expr_index ){
+		else if( index == Expr_index ){
 
 			// exit expr block unset flag and index
 			in_Expr = false;
@@ -53,7 +63,43 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 			//create quadruples
 			createQuadruples(postfix_expr);
 		
+		}/*
+		else if( token.compare("while") == 0 ){
+			while_index = itr -> second.index;
+			in_while = true;
 		}
+		else if( itr-> second.index == while_index && in_while ){
+			// push for insert jmp pos
+			while_jmp_stack.push( quadruples.size() - 1 );
+		}*/
+		else if( token.compare("if") == 0 ){
+			// push for insert jmp pos
+			ss.str("");
+			ss.clear();
+			ss <<  name_index;
+			if_jmp_stack.push( quadruples.size() + 1 );
+			if_tmp_stack.push( "t" + ss.str() );
+		}
+		else if( token.compare("else") == 0 ){
+			ss.str("");
+			ss.clear();
+			ss <<  quadruples.size() + 2 + if_jmp_stack.size() ;
+			
+			quadruples.insert( quadruples.begin() + if_jmp_stack.top() , Quadruples("jf", ss.str(), if_tmp_stack.top(), "" )  );
+			if_jmp_stack.pop();
+			if_tmp_stack.pop();
+			else_jmp_stack.push( quadruples.size() );
+			else_index.push( index - 1 );
+		}
+		else if( !else_index.empty() && index == else_index.top() ){
+			ss.str("");
+			ss.clear();
+			ss <<  quadruples.size() + 2 + if_jmp_stack.size() ;
+			
+			quadruples.insert( quadruples.begin() + else_jmp_stack.top() , Quadruples("jp", ss.str(), "", "" )  );
+			else_jmp_stack.pop();
+			else_index.pop();
+		} 
 
 		// in expr block, push symbol 
 		if( ( catergory.compare("Identifier") == 0 || catergory.compare("Operator")  == 0 \
@@ -215,4 +261,9 @@ void InterCodeGenerator:: outputQuadruples(){
 // let other class can get quadruples
 vector<Quadruples> InterCodeGenerator:: getQuadruples(){
 	return quadruples;	
+}		
+
+string  InterCodeGenerator:: toString(int integer){
+
+
 }
