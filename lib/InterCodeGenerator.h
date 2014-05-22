@@ -26,7 +26,9 @@ class InterCodeGenerator{
 		vector<Quadruples> quadruples;	
 		vector<queue<string> > expr_v_queue;
 		queue<Node> postfix(queue<Node> expr);
-		
+		stack<string> if_tmp_stack;
+
+		string toString(int integer);
 		void createQuadruples(queue<Node> post_expr);
 		int priority(Node node);
 		void outputQuadruples();
