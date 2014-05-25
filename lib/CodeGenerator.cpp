@@ -39,25 +39,26 @@ void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 		arg1 = itr-> getArg1();
 		arg2 = itr-> getArg2();
 		result = itr -> getResult();	
-		
-		// add if jmp
-		if( quadruples_count == until_jf_stack.top() ){
+
+		// add JEQ
+		if( !until_jf_stack.empty() && quadruples_count == until_jf_stack.top() ){
 			machine_code.insert( machine_code.begin() + jf_pos_stack.top(), fromatCode( jf_count_stack.top(), \
-									"JEQ", getReg( jf_tmp_stack.top() ), toString(count) + "(0)", "" ) );	
+									"JEQ",  jf_tmp_stack.top(), toString(count) + "(0)", "" ) );	
 			jf_tmp_stack.pop();
 			jf_pos_stack.pop();
 			jf_count_stack.pop();
 			until_jf_stack.pop();
 		}
 		
-		// add end if jmp
-		if( quadruples_count == until_jp_stack.top() ){
+		// add LDA
+		if( !until_jp_stack.empty() && quadruples_count == until_jp_stack.top() ){
 			machine_code.insert( machine_code.begin() + jp_pos_stack.top(), fromatCode( jp_count_stack.top(), "LDA", "7", toString(count) + "(0)", "" ) );	
 			jp_pos_stack.pop();
 			jp_count_stack.pop();
 			until_jp_stack.pop();
 		}
 		
+
 		// is assign digit
 		if( op.compare("=") == 0  && isdigit( itr-> getArg1()[0] ) ){
 			machine_code.push_back( fromatCode(count++, "LDC", getReg(arg1), arg1 + "(0)", "" ) );
@@ -72,23 +73,29 @@ void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 			machine_code.push_back( fromatCode(count++, "ST",  getReg(arg1), getMem(result) + "(0)", "" ) );
 			finalString = arg1;
 		}
-		//  jmp if 
+		//  jmp if false 
 		else if( op.compare("jf") == 0){
 			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "") );
 			jf_count_stack.push( count++ );
-			jf_tmp_stack.push( arg2 );
+			jf_tmp_stack.push( getReg(arg2) );
 			jf_pos_stack.push( machine_code.size()  );
 			until_jf_stack.push( atoi( arg1.c_str() ) );
 		} // jmp
 		else if( op.compare("jp") == 0){
+			int go_to = atoi( arg1.c_str() );
+		
 			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "") );
-			jp_count_stack.push( count++ );
-			jp_pos_stack.push( machine_code.size()  );
-			until_jp_stack.push( atoi( arg1.c_str() ) );
+			if( go_to < quadruples_count ){
+				machine_code.push_back( fromatCode( count++, "LDA", "7", toString( jf_count_stack.top() - 6 ) + "(0)", "" ) );	
+			}
+			else{
+				jp_count_stack.push( count++ );
+				jp_pos_stack.push( machine_code.size() + 1 );
+				until_jp_stack.push( atoi( arg1.c_str() ) );
+			}
 		}	
 		// is operator and ALU operate
 		else{
-		
 			// lw arg1
 			if( isdigit( itr-> getArg1()[0] ) ){
 				machine_code.push_back( fromatCode(count++, "LDC", getReg(arg1), arg1 + "(0)", "" ) );
@@ -97,6 +104,7 @@ void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 				machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
 				machine_code.push_back( fromatCode(count++, "LD",  getReg(arg1), getMem(arg1) + "(0)" , "" ) );
 			}
+	
 
 			// arg2 lw digit
 			if( isdigit( itr-> getArg2()[0] ) ){
@@ -111,14 +119,13 @@ void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 			// alu operater
 			machine_code.push_back( fromatCode(count++, getOpCode(op),  getReg(result), getReg(arg1) , getReg(arg2)) );
 			machine_code.push_back( fromatCode(count++, "ST",  getReg(result), getMem(result) + "(0)", "" ) );
-			
 			finalString = result;
 		}
 	}
 
 	while( !until_jf_stack.empty() ){
 			machine_code.insert( machine_code.begin() + jf_pos_stack.top(), fromatCode( jf_count_stack.top() , \
-									"JEQ", getReg( jf_tmp_stack.top()  ), toString(count) + "(0)", "" ) );	
+									"JEQ", jf_tmp_stack.top(), toString(count) + "(0)", "" ) );	
 			jf_tmp_stack.pop();
 			jf_pos_stack.pop();
 			jf_count_stack.pop();
@@ -130,7 +137,6 @@ void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 			jp_count_stack.pop();
 			until_jp_stack.pop();
 	} 
-
 
 	// print the last result and stop machine
 	machine_code.push_back( fromatCode(count++, "OUT",  getReg(finalString), "0", "0" ) );
@@ -146,16 +152,22 @@ string CodeGenerator:: getReg(string symbol){
 	map<string, int>::iterator itr =  str_reg.find(symbol);
 
 	if( itr != str_reg.end() ){
+		if( reg_queue.front().compare( symbol ) == 0 ){
+			reg_queue.pop();
+			reg_queue.push( symbol );
+		}	
 		return toString(itr -> second);
 	}
 	else{
 		reg += 1;
+		
 		if( reg_queue.size() >= 6 ){
 			itr = str_reg.find( reg_queue.front() );
 			reg = itr -> second;
 			str_reg.erase( itr );
 			reg_queue.pop();
 		}
+
 		str_reg.insert( make_pair(symbol, reg) );
 		reg_queue.push( symbol );
 	}

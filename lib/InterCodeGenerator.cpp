@@ -21,16 +21,22 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 	bool in_Expr = false;  // is in Expr block ?
 	int Expr_index = -1;   // record the Expr index
 	bool in_while = false;
-	int while_index = -1;
+	string go_to;
 
 	stringstream ss;
 	queue<Node> tmp;      // tmp stack push expr symbol    
 	queue<Node> postfix_expr;
-	stack<int> while_jmp_stack;
+	stack<int> while_ret_stack;
+	stack<int> while_index_stack;
+	stack<string> while_tmp_stack;
+
 	stack<int> if_jmp_stack;
-	stack<string> if_tmp_stack;
 	stack<int> else_jmp_stack;
 	stack<int> else_index;
+	stack<string> if_tmp_stack;
+	stack<int> break_jmp_stack;
+	bool unaryOp = false;
+
 
 	/* ParsingTree ->  produce three address code by postfix */
 	for(multimap<int, Node>::iterator itr = parsingTree.begin(); itr != parsingTree.end(); ++ itr){
@@ -39,7 +45,7 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 		string symbol =  itr -> second.symbol;
 		string catergory = itr -> second.catergory;
 		int index = itr -> second.index;
-		
+	
 		if( !in_Expr && token.compare("Expr") == 0 ){
 
 			// set flag and record index
@@ -63,47 +69,64 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 			//create quadruples
 			createQuadruples(postfix_expr);
 		
-		}/*
-		else if( token.compare("while") == 0 ){
-			while_index = itr -> second.index;
-			in_while = true;
 		}
-		else if( itr-> second.index == while_index && in_while ){
+		else if( token.compare("while") == 0 ){
+			while_ret_stack.push( quadruples.size() + 1 );
+			while_index_stack.push( itr -> second.index - 1 );
+			while_tmp_stack.push( "t" + toString(name_index) );
+		}
+		else if( !while_index_stack.empty() &&  index == while_index_stack.top() ){
 			// push for insert jmp pos
-			while_jmp_stack.push( quadruples.size() - 1 );
-		}*/
+			go_to = toString( quadruples.size()  + 2 + if_tmp_stack.size() + while_tmp_stack.size() + break_jmp_stack.size() );
+			quadruples.insert( quadruples.begin() +  while_ret_stack.top() , Quadruples("jf",  go_to, while_tmp_stack.top(), "" )  );
+		
+			while ( !break_jmp_stack.empty() ){
+				quadruples.insert( quadruples.begin() +  break_jmp_stack.top() , Quadruples("jp",  go_to, "", "" )  );
+				break_jmp_stack.pop();
+			}
+
+			go_to = toString( while_ret_stack.top() + while_tmp_stack.size() + if_tmp_stack.size() -1 );
+			quadruples.push_back( Quadruples("jp", go_to, "", "" )  );
+			
+			while_ret_stack.pop();
+			while_tmp_stack.pop();
+			while_index_stack.pop();
+		}
 		else if( token.compare("if") == 0 ){
 			// push for insert jmp pos
-			ss.str("");
-			ss.clear();
-			ss <<  name_index;
 			if_jmp_stack.push( quadruples.size() + 1 );
-			if_tmp_stack.push( "t" + ss.str() );
+			if_tmp_stack.push( "t" + toString( name_index ) );
 		}
 		else if( token.compare("else") == 0 ){
-			ss.str("");
-			ss.clear();
-			ss <<  quadruples.size() + 2 + if_jmp_stack.size() ;
 			
-			quadruples.insert( quadruples.begin() + if_jmp_stack.top() , Quadruples("jf", ss.str(), if_tmp_stack.top(), "" )  );
+			go_to = toString( quadruples.size() + 2 + if_jmp_stack.size() + while_ret_stack.size() + break_jmp_stack.size() );
+			quadruples.insert( quadruples.begin() + if_jmp_stack.top() , Quadruples("jf", go_to, if_tmp_stack.top(), "" )  );
 			if_jmp_stack.pop();
 			if_tmp_stack.pop();
 			else_jmp_stack.push( quadruples.size() );
 			else_index.push( index - 1 );
 		}
 		else if( !else_index.empty() && index == else_index.top() ){
-			ss.str("");
-			ss.clear();
-			ss <<  quadruples.size() + 2 + if_jmp_stack.size() ;
-			
-			quadruples.insert( quadruples.begin() + else_jmp_stack.top() , Quadruples("jp", ss.str(), "", "" )  );
+			go_to = toString( quadruples.size() + 2 + if_jmp_stack.size() + while_ret_stack.size() + break_jmp_stack.size() );
+			quadruples.insert( quadruples.begin() + else_jmp_stack.top() , Quadruples("jp", go_to, "", "" )  );
 			else_jmp_stack.pop();
 			else_index.pop();
-		} 
+		}
+		else if( token.compare("break") == 0 ){
+			break_jmp_stack.push( quadruples.size() + 1 + if_jmp_stack.size() );
+		}
+		else if ( token.compare("UnaryOp") == 0){
+			unaryOp = true;
+		}
+
 
 		// in expr block, push symbol 
 		if( ( catergory.compare("Identifier") == 0 || catergory.compare("Operator")  == 0 \
 								|| catergory.compare("Number")  == 0) || catergory.compare("ch") == 0   && in_Expr ){
+			if( unaryOp ){
+				tmp.push(Node(0, "0", "0", "Number"));
+				unaryOp = false;
+			}
 			tmp.push( itr -> second );
 		}
 	}
@@ -177,6 +200,8 @@ int InterCodeGenerator:: priority(Node node){
 					return 11;
 			case '=':
 					return 16;
+			case '[': case ']':
+					return 2;
 			default:
 					break;
 		}
@@ -264,6 +289,7 @@ vector<Quadruples> InterCodeGenerator:: getQuadruples(){
 }		
 
 string  InterCodeGenerator:: toString(int integer){
-
-
+	stringstream ss;
+	ss << integer;
+	return ss.str();
 }
