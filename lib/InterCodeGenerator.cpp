@@ -122,12 +122,33 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 
 		// in expr block, push symbol 
 		if( ( catergory.compare("Identifier") == 0 || catergory.compare("Operator")  == 0 \
-								|| catergory.compare("Number")  == 0) || catergory.compare("ch") == 0   && in_Expr ){
+					|| catergory.compare("Number")  == 0 || catergory.compare("ch") == 0)   && in_Expr ){
+				
+			Node push_item = (itr) -> second;
+			
+			++itr;
 			if( unaryOp ){
 				tmp.push(Node(0, "0", "0", "Number"));
 				unaryOp = false;
 			}
-			tmp.push( itr -> second );
+			if ( (itr++) -> second.symbol.compare("[") == 0 ){
+				queue<Node> array_queue;
+				array_queue.push( Node(0, "0", "0", "Number") );
+				array_queue.push( Node(0, "+", "+", "Operator") );
+				while( (++itr) -> second.symbol.compare("]") != 0 ){
+					if ( islower( itr-> second.token[0] ) || itr-> second.catergory.compare("Operator") == 0 ){
+						array_queue.push( itr-> second );		
+					}
+				}
+				postfix_expr = postfix(array_queue);
+				createQuadruples(postfix_expr);
+				quadruples.push_back( Quadruples("[]=", "t" + toString(name_index-1), "",  push_item.symbol)  );
+				tmp.push( push_item );
+			}
+			else{
+				tmp.push( push_item );
+				--itr;
+			}
 		}
 	}
 
@@ -229,7 +250,7 @@ void InterCodeGenerator:: createQuadruples(queue<Node> post_expr){
 	stringstream ss;
 
 	while( !post_expr.empty() ){
-		
+
 		// operator get two element in pr_stack and  push to quadruples
 		if ( post_expr.front().catergory.compare("Operator") == 0 ) {
 

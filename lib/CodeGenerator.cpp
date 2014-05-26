@@ -15,9 +15,10 @@ CodeGenerator:: ~CodeGenerator(){
 
 }
 
-void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
+void CodeGenerator:: gernerateCode(multimap<int, Node> parsingTree, vector<Quadruples> quadruples){
 		
 	int quadruples_count = 0;
+	bool array_op = false;
 	string op;
 	string arg1;
 	string arg2;
@@ -30,6 +31,13 @@ void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 	stack<int> until_jf_stack;
 	stack<int> until_jp_stack;
 	stack<string> jf_tmp_stack;
+	stack<string> array_stack;
+	string array_name1;
+	string array_name2;
+	string offset1;
+	string offset2;
+
+	initMemory(parsingTree);
 
 	// iterator quadruples to convert to machine code
 	for(vector<Quadruples>::iterator itr = quadruples.begin(); itr != quadruples.end(); ++itr ){
@@ -58,6 +66,55 @@ void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 			until_jp_stack.pop();
 		}
 		
+		if( op.compare("[]=") == 0 ){
+			array_stack.push( arg1  );
+			array_stack.push( result );
+			continue;
+		}
+		else if( !array_stack.empty() && result.compare( array_stack.top() ) == 0){
+			array_stack.pop();
+			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
+			machine_code.push_back( fromatCode(count++, "LD",  getReg(arg1), getMem(arg1) + "(0)" , "" ) );
+			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_stack.top() ), getMem( array_stack.top() ) + "(0)" , "" ) );
+			machine_code.push_back( fromatCode(count++, "LDC",  getReg(result), getMem(result) + "(0)", "" ) );
+			machine_code.push_back( fromatCode(count++, "ADD",  getReg( result ),  getReg(result),  getReg( array_stack.top() ) ) );
+			machine_code.push_back( fromatCode(count++, "ST",  getReg(arg1),    "0(" + getReg(result) + ")", "" ) );
+			array_stack.pop();
+			continue;
+		}		
+		
+		if( !array_stack.empty() && arg1.compare( array_stack.top() ) == 0  ){
+			array_name1 = array_stack.top();
+			array_stack.pop();
+			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
+			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name1 + array_stack.top() ),\
+									getMem( array_stack.top() ) + "(0)" , "" ) );
+			machine_code.push_back( fromatCode(count++, "LDC",  getReg( array_name1 ), getMem( array_name1 ) + "(0)", "" ) );
+			machine_code.push_back( fromatCode(count++, "ADD",  getReg( array_name1 + array_stack.top() ),  getReg( array_name1 ),\
+									getReg( array_name1 + array_stack.top() ) ) );
+			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name1 + array_stack.top() ), \
+									"0(" + getReg( array_name1 + array_stack.top() ) + ")", "" ) );
+			array_op = true;
+			offset1 = array_stack.top();
+			array_stack.pop();
+		}
+		
+		if( !array_stack.empty() && arg2.compare( array_stack.top() ) == 0){
+			array_name2 = array_stack.top();
+			array_stack.pop();
+			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
+			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name1 + array_stack.top() ),\
+									getMem( array_stack.top() ) + "(0)" , "" ) );
+			machine_code.push_back( fromatCode(count++, "LDC",  getReg( array_name2 ), getMem( array_name2 ) + "(0)", "" ) );
+			machine_code.push_back( fromatCode(count++, "ADD",  getReg( array_name2 + array_stack.top() ),  getReg( array_name2 ),\
+									getReg( array_name2 + array_stack.top() ) ) );
+			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name2 + array_stack.top() ), \
+									"0(" + getReg( array_name2 + array_stack.top() ) + ")", "" ) );
+			array_op = true;
+			offset2 = array_stack.top();
+			array_stack.pop();
+		}
+	
 
 		// is assign digit
 		if( op.compare("=") == 0  && isdigit( itr-> getArg1()[0] ) ){
@@ -96,28 +153,49 @@ void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 		}	
 		// is operator and ALU operate
 		else{
+
 			// lw arg1
 			if( isdigit( itr-> getArg1()[0] ) ){
 				machine_code.push_back( fromatCode(count++, "LDC", getReg(arg1), arg1 + "(0)", "" ) );
 			}
-			else{
+			else if ( arg1.compare(array_name1) != 0  && arg1.compare(array_name2) != 0 ){
 				machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
 				machine_code.push_back( fromatCode(count++, "LD",  getReg(arg1), getMem(arg1) + "(0)" , "" ) );
 			}
+			else if ( arg1.compare(array_name1) == 0 ){
+				arg1 = arg1 + offset1;
+			}
+			else{
+				arg1 = arg1 + offset2; 
+			}
 	
-
 			// arg2 lw digit
 			if( isdigit( itr-> getArg2()[0] ) ){
 				machine_code.push_back( fromatCode(count++, "LDC", getReg(arg2), arg2 + "(0)", "" ) );
 			}
 			// arg2 lw identifier
-			else{
+			else if ( arg2.compare(array_name1) != 0 && arg2.compare(array_name2) != 0 ){
 				machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
 				machine_code.push_back( fromatCode(count++, "LD",  getReg(arg2), getMem(arg2) + "(0)" , "" ) );
 			}
-
+			else if ( arg1.compare(array_name1) == 0 ){
+				arg2 = arg2 + offset1;
+			}
+			else{
+				arg2 = arg2 + offset2; 
+			}
+	
 			// alu operater
-			machine_code.push_back( fromatCode(count++, getOpCode(op),  getReg(result), getReg(arg1) , getReg(arg2)) );
+			if ( !array_op ){
+				machine_code.push_back( fromatCode(count++, getOpCode(op),  getReg(result), getReg(arg1) , getReg(arg2)) );
+			}
+			else{
+				machine_code.push_back( fromatCode(count++, getOpCode(op),  getReg(result), getReg(arg1) , getReg(arg2)) );
+				array_stack.pop();
+				array_name1 = "";
+				array_name2 = "";
+				array_op = false;
+			}
 			machine_code.push_back( fromatCode(count++, "ST",  getReg(result), getMem(result) + "(0)", "" ) );
 			finalString = result;
 		}
@@ -141,8 +219,40 @@ void CodeGenerator:: gernerateCode(vector<Quadruples> quadruples){
 	// print the last result and stop machine
 	machine_code.push_back( fromatCode(count++, "OUT",  getReg(finalString), "0", "0" ) );
 	machine_code.push_back( fromatCode(count++, "HALT",  "1", "0", "0" ) );
-	
+
 	outputFile();
+}
+
+void CodeGenerator:: initMemory(multimap<int, Node> parsingTree){
+
+	bool varDecl = false;
+	string var_name;
+
+	for(multimap<int, Node>::iterator itr = parsingTree.begin(); itr != parsingTree.end(); ++ itr){
+
+		// is decl
+		if ( itr -> second.token.compare("Type") == 0 ){
+			varDecl = true;
+		}
+		else if ( varDecl && ( itr-> second.catergory.compare("Identifier") == 0) ){
+			
+			var_name = (itr++) -> second.symbol;
+
+			// array initailize
+			if ( (++itr) -> second.symbol.compare("[") == 0 ){
+				int array_size = atoi( (++itr) -> second.symbol.c_str() ) - 1;	
+				getMem( var_name );
+				while( array_size > 0 ){
+					getMem( var_name + "[" + toString(array_size) + "]" );
+					-- array_size;
+				}
+			}// normal variable initailize
+			else{
+				getMem(var_name);
+			}
+			varDecl = false;
+		}
+	}
 }
 
 
@@ -195,7 +305,7 @@ string CodeGenerator:: getMem(string symbol){
 }
 
 
-/* convet op symobl to machine code*/ 
+/* convet op symbol to machine code*/ 
 string CodeGenerator:: getOpCode(string op){
 
 	if( op.size() > 1 ){
@@ -219,7 +329,9 @@ string CodeGenerator:: getOpCode(string op){
 				return "AND";
 
 		}
-	
+		if(op.compare("&&") == 0){
+				return "OR"
+		}
 	}
 	else{
 			switch(op[0]){
@@ -238,6 +350,10 @@ string CodeGenerator:: getOpCode(string op){
 							return "GT";
 					case '<':
 							return "LT";
+					case '&':
+							return "AND";
+					case '|':
+							return "OR";
 					default:
 							return "Error";
 			}
