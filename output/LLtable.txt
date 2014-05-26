@@ -1,0 +1,263 @@
+S
+Addop           +               + 
+Addop           -               - 
+BinOp           !=              != 
+BinOp           &&              && 
+BinOp           <               < 
+BinOp           <=              <= 
+BinOp           ==              == 
+BinOp           >               > 
+BinOp           >=              >= 
+BinOp           ||              || 
+Block           {               { VarDeclList StmtList } 
+Decl            (               FunDecl 
+Decl            ;               VarDecl 
+Decl            [               VarDecl 
+DeclList        $               epsilon 
+DeclList        char            Type id Decl DeclList 
+DeclList        int             Type id Decl DeclList 
+Expr            !               UnaryOp Expr Expr' 
+Expr            !=              Expr' 
+Expr            &&              Expr' 
+Expr            (               Primary Expr' 
+Expr            )               Expr' 
+Expr            *               Expr' 
+Expr            +               Expr' 
+Expr            ,               Expr' 
+Expr            -               UnaryOp Expr Expr' 
+Expr            /               Expr' 
+Expr            ;               Expr' 
+Expr            <               Expr' 
+Expr            <=              Expr' 
+Expr            =               Expr' 
+Expr            ==              Expr' 
+Expr            >               Expr' 
+Expr            >=              Expr' 
+Expr            ]               Expr' 
+Expr            ch              Primary Expr' 
+Expr            id              id Exprfront Expr' 
+Expr            num             Primary Expr' 
+Expr            ||              Expr' 
+Expr'           !               epsilon 
+Expr'           !=              BinOp Expr Expr' 
+Expr'           &&              BinOp Expr Expr' 
+Expr'           (               epsilon 
+Expr'           )               epsilon 
+Expr'           *               MulOp Expr Expr' 
+Expr'           +               Addop Expr Expr' 
+Expr'           ,               epsilon 
+Expr'           -               Addop Expr Expr' 
+Expr'           /               MulOp Expr Expr' 
+Expr'           ;               epsilon 
+Expr'           <               BinOp Expr Expr' 
+Expr'           <=              BinOp Expr Expr' 
+Expr'           ==              BinOp Expr Expr' 
+Expr'           >               BinOp Expr Expr' 
+Expr'           >=              BinOp Expr Expr' 
+Expr'           ]               epsilon 
+Expr'           ch              epsilon 
+Expr'           id              epsilon 
+Expr'           num             epsilon 
+Expr'           ||              BinOp Expr Expr' 
+ExprList        !               ExprListTail 
+ExprList        !=              ExprListTail 
+ExprList        &&              ExprListTail 
+ExprList        (               ExprListTail 
+ExprList        )               ExprListTail 
+ExprList        *               ExprListTail 
+ExprList        +               ExprListTail 
+ExprList        ,               ExprListTail 
+ExprList        -               ExprListTail 
+ExprList        /               ExprListTail 
+ExprList        <               ExprListTail 
+ExprList        <=              ExprListTail 
+ExprList        ==              ExprListTail 
+ExprList        >               ExprListTail 
+ExprList        >=              ExprListTail 
+ExprList        ch              ExprListTail 
+ExprList        id              ExprListTail 
+ExprList        num             ExprListTail 
+ExprList        ||              ExprListTail 
+ExprListTail    !               Expr ExprListTailCont 
+ExprListTail    !=              Expr ExprListTailCont 
+ExprListTail    &&              Expr ExprListTailCont 
+ExprListTail    (               Expr ExprListTailCont 
+ExprListTail    )               Expr ExprListTailCont 
+ExprListTail    *               Expr ExprListTailCont 
+ExprListTail    +               Expr ExprListTailCont 
+ExprListTail    ,               Expr ExprListTailCont 
+ExprListTail    -               Expr ExprListTailCont 
+ExprListTail    /               Expr ExprListTailCont 
+ExprListTail    <               Expr ExprListTailCont 
+ExprListTail    <=              Expr ExprListTailCont 
+ExprListTail    ==              Expr ExprListTailCont 
+ExprListTail    >               Expr ExprListTailCont 
+ExprListTail    >=              Expr ExprListTailCont 
+ExprListTail    ch              Expr ExprListTailCont 
+ExprListTail    id              Expr ExprListTailCont 
+ExprListTail    num             Expr ExprListTailCont 
+ExprListTail    ||              Expr ExprListTailCont 
+ExprListTailCont)               epsilon 
+ExprListTailCont,               , ExprListTail 
+Exprfront       !=              epsilon 
+Exprfront       &&              epsilon 
+Exprfront       (               ( ExprList ) 
+Exprfront       )               epsilon 
+Exprfront       *               epsilon 
+Exprfront       +               epsilon 
+Exprfront       ,               epsilon 
+Exprfront       -               epsilon 
+Exprfront       /               epsilon 
+Exprfront       ;               epsilon 
+Exprfront       <               epsilon 
+Exprfront       <=              epsilon 
+Exprfront       =               = Expr 
+Exprfront       ==              epsilon 
+Exprfront       >               epsilon 
+Exprfront       >=              epsilon 
+Exprfront       [               [ Expr ] Exprfront' 
+Exprfront       ]               epsilon 
+Exprfront       ||              epsilon 
+Exprfront'      !=              epsilon 
+Exprfront'      &&              epsilon 
+Exprfront'      (               epsilon 
+Exprfront'      )               epsilon 
+Exprfront'      *               epsilon 
+Exprfront'      +               epsilon 
+Exprfront'      ,               epsilon 
+Exprfront'      -               epsilon 
+Exprfront'      /               epsilon 
+Exprfront'      ;               epsilon 
+Exprfront'      <               epsilon 
+Exprfront'      <=              epsilon 
+Exprfront'      =               = Expr 
+Exprfront'      ==              epsilon 
+Exprfront'      >               epsilon 
+Exprfront'      >=              epsilon 
+Exprfront'      ]               epsilon 
+Exprfront'      ||              epsilon 
+FunDecl         (               ( ParamDeclList ) Block 
+MulOp           *               * 
+MulOp           /               / 
+ParamDecl       char            Type id ParamDeclCont 
+ParamDecl       int             Type id ParamDeclCont 
+ParamDeclCont   )               epsilon 
+ParamDeclCont   ,               epsilon 
+ParamDeclCont   [               [ ] 
+ParamDeclList   )               epsilon 
+ParamDeclList   char            ParamDeclListTail 
+ParamDeclList   int             ParamDeclListTail 
+ParamDeclListTailchar            ParamDecl ParamDeclListTailCont 
+ParamDeclListTailint             ParamDecl ParamDeclListTailCont 
+ParamDeclListTailCont)               epsilon 
+ParamDeclListTailCont,               , ParamDeclListTail 
+Primary         (               ( Expr ) 
+Primary         ch              ch 
+Primary         num             num 
+Program         $               DeclList 
+Program         char            DeclList 
+Program         int             DeclList 
+S               $               Program $ 
+S               char            Program $ 
+S               int             Program $ 
+Stmt            !               Expr ; 
+Stmt            !=              Expr ; 
+Stmt            &&              Expr ; 
+Stmt            (               Expr ; 
+Stmt            *               Expr ; 
+Stmt            +               Expr ; 
+Stmt            -               Expr ; 
+Stmt            /               Expr ; 
+Stmt            ;               ; 
+Stmt            <               Expr ; 
+Stmt            <=              Expr ; 
+Stmt            ==              Expr ; 
+Stmt            >               Expr ; 
+Stmt            >=              Expr ; 
+Stmt            break           break ; 
+Stmt            ch              Expr ; 
+Stmt            id              Expr ; 
+Stmt            if              if ( Expr ) Stmt else Stmt 
+Stmt            num             Expr ; 
+Stmt            return          return Expr ; 
+Stmt            while           while ( Expr ) Stmt 
+Stmt            {               Block 
+Stmt            ||              Expr ; 
+StmtList        !               Stmt StmtListCont 
+StmtList        !=              Stmt StmtListCont 
+StmtList        &&              Stmt StmtListCont 
+StmtList        (               Stmt StmtListCont 
+StmtList        *               Stmt StmtListCont 
+StmtList        +               Stmt StmtListCont 
+StmtList        -               Stmt StmtListCont 
+StmtList        /               Stmt StmtListCont 
+StmtList        ;               Stmt StmtListCont 
+StmtList        <               Stmt StmtListCont 
+StmtList        <=              Stmt StmtListCont 
+StmtList        ==              Stmt StmtListCont 
+StmtList        >               Stmt StmtListCont 
+StmtList        >=              Stmt StmtListCont 
+StmtList        break           Stmt StmtListCont 
+StmtList        ch              Stmt StmtListCont 
+StmtList        id              Stmt StmtListCont 
+StmtList        if              Stmt StmtListCont 
+StmtList        num             Stmt StmtListCont 
+StmtList        return          Stmt StmtListCont 
+StmtList        while           Stmt StmtListCont 
+StmtList        {               Stmt StmtListCont 
+StmtList        ||              Stmt StmtListCont 
+StmtListCont    !               StmtList 
+StmtListCont    !=              StmtList 
+StmtListCont    &&              StmtList 
+StmtListCont    (               StmtList 
+StmtListCont    *               StmtList 
+StmtListCont    +               StmtList 
+StmtListCont    -               StmtList 
+StmtListCont    /               StmtList 
+StmtListCont    ;               StmtList 
+StmtListCont    <               StmtList 
+StmtListCont    <=              StmtList 
+StmtListCont    ==              StmtList 
+StmtListCont    >               StmtList 
+StmtListCont    >=              StmtList 
+StmtListCont    break           StmtList 
+StmtListCont    ch              StmtList 
+StmtListCont    id              StmtList 
+StmtListCont    if              StmtList 
+StmtListCont    num             StmtList 
+StmtListCont    return          StmtList 
+StmtListCont    while           StmtList 
+StmtListCont    {               StmtList 
+StmtListCont    ||              StmtList 
+StmtListCont    }               epsilon 
+Type            char            char 
+Type            int             int 
+UnaryOp         !               ! 
+UnaryOp         -               - 
+VarDecl         ;               ; 
+VarDecl         [               [ num ] ; 
+VarDeclList     !               epsilon 
+VarDeclList     !=              epsilon 
+VarDeclList     &&              epsilon 
+VarDeclList     (               epsilon 
+VarDeclList     *               epsilon 
+VarDeclList     +               epsilon 
+VarDeclList     -               epsilon 
+VarDeclList     /               epsilon 
+VarDeclList     ;               epsilon 
+VarDeclList     <               epsilon 
+VarDeclList     <=              epsilon 
+VarDeclList     ==              epsilon 
+VarDeclList     >               epsilon 
+VarDeclList     >=              epsilon 
+VarDeclList     break           epsilon 
+VarDeclList     ch              epsilon 
+VarDeclList     char            Type id VarDecl VarDeclList 
+VarDeclList     id              epsilon 
+VarDeclList     if              epsilon 
+VarDeclList     int             Type id VarDecl VarDeclList 
+VarDeclList     num             epsilon 
+VarDeclList     return          epsilon 
+VarDeclList     while           epsilon 
+VarDeclList     {               epsilon 
+VarDeclList     ||              epsilon 
