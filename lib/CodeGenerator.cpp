@@ -1,5 +1,3 @@
-#include <iostream>
-#include <string>
 #include "CodeGenerator.h"
 using namespace std;
 
@@ -37,6 +35,8 @@ void CodeGenerator:: gernerateCode(multimap<int, Node> parsingTree, vector<Quadr
 	string offset1;
 	string offset2;
 
+
+	// initialize memory
 	initMemory(parsingTree);
 
 	// iterator quadruples to convert to machine code
@@ -48,8 +48,9 @@ void CodeGenerator:: gernerateCode(multimap<int, Node> parsingTree, vector<Quadr
 		arg2 = itr-> getArg2();
 		result = itr -> getResult();	
 
-		// add JEQ
+		// add JEQ ( if while )
 		if( !until_jf_stack.empty() && quadruples_count == until_jf_stack.top() ){
+			
 			machine_code.insert( machine_code.begin() + jf_pos_stack.top(), fromatCode( jf_count_stack.top(), \
 									"JEQ",  jf_tmp_stack.top(), toString(count) + "(0)", "" ) );	
 			jf_tmp_stack.pop();
@@ -58,72 +59,100 @@ void CodeGenerator:: gernerateCode(multimap<int, Node> parsingTree, vector<Quadr
 			until_jf_stack.pop();
 		}
 		
-		// add LDA
+		// add LDA ( if while break )
 		if( !until_jp_stack.empty() && quadruples_count == until_jp_stack.top() ){
+			
 			machine_code.insert( machine_code.begin() + jp_pos_stack.top(), fromatCode( jp_count_stack.top(), "LDA", "7", toString(count) + "(0)", "" ) );	
 			jp_pos_stack.pop();
 			jp_count_stack.pop();
 			until_jp_stack.pop();
 		}
-		
+		/// array address alu	
 		if( op.compare("[]=") == 0 ){
 			array_stack.push( arg1  );
 			array_stack.push( result );
 			continue;
-		}
+		}// array assign
 		else if( !array_stack.empty() && result.compare( array_stack.top() ) == 0){
 			array_stack.pop();
 			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
+			
+			// lw assing value
 			machine_code.push_back( fromatCode(count++, "LD",  getReg(arg1), getMem(arg1) + "(0)" , "" ) );
+			
+			//  lw offset
 			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_stack.top() ), getMem( array_stack.top() ) + "(0)" , "" ) );
+			
+			//  lw address
 			machine_code.push_back( fromatCode(count++, "LDC",  getReg(result), getMem(result) + "(0)", "" ) );
+			
+			//  get array address 
 			machine_code.push_back( fromatCode(count++, "ADD",  getReg( result ),  getReg(result),  getReg( array_stack.top() ) ) );
+			
+			// set to memory
 			machine_code.push_back( fromatCode(count++, "ST",  getReg(arg1),    "0(" + getReg(result) + ")", "" ) );
 			array_stack.pop();
 			continue;
 		}		
-		
+		// array in arg1, ALU 
 		if( !array_stack.empty() && arg1.compare( array_stack.top() ) == 0  ){
+			
 			array_name1 = array_stack.top();
 			array_stack.pop();
-			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
-			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name1 + array_stack.top() ),\
-									getMem( array_stack.top() ) + "(0)" , "" ) );
-			machine_code.push_back( fromatCode(count++, "LDC",  getReg( array_name1 ), getMem( array_name1 ) + "(0)", "" ) );
-			machine_code.push_back( fromatCode(count++, "ADD",  getReg( array_name1 + array_stack.top() ),  getReg( array_name1 ),\
-									getReg( array_name1 + array_stack.top() ) ) );
-			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name1 + array_stack.top() ), \
-									"0(" + getReg( array_name1 + array_stack.top() ) + ")", "" ) );
-			array_op = true;
 			offset1 = array_stack.top();
+			
+			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
+			
+			// lw offset value
+			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name1 + offset1 ),\
+									getMem( offset1 ) + "(0)" , "" ) );
+
+			// lw array_name address
+			machine_code.push_back( fromatCode(count++, "LDC",  getReg( array_name1 ), getMem( array_name1 ) + "(0)", "" ) );
+			
+			// add to get array + offset address
+			machine_code.push_back( fromatCode(count++, "ADD",  getReg( array_name1 + offset1 ),  getReg( array_name1 ),\
+									getReg( array_name1 + offset1 ) ) );
+
+			// lw array1 value
+			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name1 + offset1 ), \
+									"0(" + getReg( array_name1 + offset1 ) + ")", "" ) );
+			array_op = true;
 			array_stack.pop();
 		}
-		
+		// array ALU in arg2
 		if( !array_stack.empty() && arg2.compare( array_stack.top() ) == 0){
 			array_name2 = array_stack.top();
 			array_stack.pop();
+			offset2 = array_stack.top();	
 			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
-			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name1 + array_stack.top() ),\
-									getMem( array_stack.top() ) + "(0)" , "" ) );
-			machine_code.push_back( fromatCode(count++, "LDC",  getReg( array_name2 ), getMem( array_name2 ) + "(0)", "" ) );
-			machine_code.push_back( fromatCode(count++, "ADD",  getReg( array_name2 + array_stack.top() ),  getReg( array_name2 ),\
-									getReg( array_name2 + array_stack.top() ) ) );
-			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name2 + array_stack.top() ), \
-									"0(" + getReg( array_name2 + array_stack.top() ) + ")", "" ) );
+		
+			// lw offset value
+			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name2 + offset2 ),\
+									getMem( offset2 ) + "(0)" , "" ) );
+			// lw array_name2 address
+			machine_code.push_back( fromatCode(count++, "LDC",  getReg( array_name2), getMem( array_name2 ) + "(0)", "" ) );
+			
+			// add to get attay + offset address
+			machine_code.push_back( fromatCode(count++, "ADD",  getReg( array_name2 + offset2 ),  getReg( array_name2 ),\
+									getReg( array_name2 + offset2 ) ) );
+
+			// lw array2 value
+			machine_code.push_back( fromatCode(count++, "LD",  getReg( array_name2 + offset2 ), \
+									"0(" + getReg( array_name2 + offset2 ) + ")", "" ) );
 			array_op = true;
-			offset2 = array_stack.top();
 			array_stack.pop();
 		}
 	
 
-		// is assign digit
+		// is assign '=' digit
 		if( op.compare("=") == 0  && isdigit( itr-> getArg1()[0] ) ){
 			machine_code.push_back( fromatCode(count++, "LDC", getReg(arg1), arg1 + "(0)", "" ) );
 			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "") );
 			machine_code.push_back( fromatCode(count++, "ST", getReg(arg1), getMem(result) + "(0)", "") ) ;
 			finalString = arg1;
 		}
-		// is assign identifier
+		// is assign '=' identifier
 		else if( op.compare("=") == 0 ){
 			machine_code.push_back( fromatCode(count++, "LD",  getReg(arg1), getMem(arg1) + "(0)" , "" ) );
 			machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
@@ -154,17 +183,20 @@ void CodeGenerator:: gernerateCode(multimap<int, Node> parsingTree, vector<Quadr
 		// is operator and ALU operate
 		else{
 
-			// lw arg1
+			// lw arg1 digit
 			if( isdigit( itr-> getArg1()[0] ) ){
 				machine_code.push_back( fromatCode(count++, "LDC", getReg(arg1), arg1 + "(0)", "" ) );
 			}
+			// identifier not array
 			else if ( arg1.compare(array_name1) != 0  && arg1.compare(array_name2) != 0 ){
 				machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
 				machine_code.push_back( fromatCode(count++, "LD",  getReg(arg1), getMem(arg1) + "(0)" , "" ) );
 			}
+			// array1
 			else if ( arg1.compare(array_name1) == 0 ){
 				arg1 = arg1 + offset1;
 			}
+			// array2
 			else{
 				arg1 = arg1 + offset2; 
 			}
@@ -173,7 +205,7 @@ void CodeGenerator:: gernerateCode(multimap<int, Node> parsingTree, vector<Quadr
 			if( isdigit( itr-> getArg2()[0] ) ){
 				machine_code.push_back( fromatCode(count++, "LDC", getReg(arg2), arg2 + "(0)", "" ) );
 			}
-			// arg2 lw identifier
+			// arg2 lw identifier not array
 			else if ( arg2.compare(array_name1) != 0 && arg2.compare(array_name2) != 0 ){
 				machine_code.push_back( fromatCode(count++, "LDC", "0", "0(0)", "" ) );
 				machine_code.push_back( fromatCode(count++, "LD",  getReg(arg2), getMem(arg2) + "(0)" , "" ) );
@@ -372,8 +404,6 @@ void CodeGenerator:: outputFile(){
 	}
 
 	for( vector<string>:: iterator itr = machine_code.begin(); itr != machine_code.end(); ++itr){
-	
-		//cout << *itr << endl;
 		output <<  *itr << endl;
 	}
 

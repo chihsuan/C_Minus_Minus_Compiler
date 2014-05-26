@@ -1,9 +1,4 @@
-#include <iostream>
-#include <string>
-#include <cstring>
 #include "Lexier.h"
-#include <iomanip>
-#include "Token.h"
 
 /* define the DFA move state */
 #define isOperators1 10
@@ -23,7 +18,6 @@
 
 using namespace std;
 
-
 /*constructor initial input_path*/
 Lexier:: Lexier(string input_path)
 	:input_path(input_path),
@@ -31,6 +25,7 @@ Lexier:: Lexier(string input_path)
 {
 }
 
+/* descontuctor delete dynamic memory */
 Lexier:: ~Lexier(){
 	for( vector<Token*>::iterator itr = token_list.begin(); itr != token_list.end(); ++itr){
 		delete  *(itr);
@@ -43,7 +38,7 @@ bool Lexier:: startParseTokens(){
 	int line_number = 1;
 	string tokenCategory = " ";	
 	ifstream& input = getInput();
-	ofstream& output = getOfStream();
+	ofstream& output = getOfstream();
 
 
 	/* loop find each token in each line for DFA check */	
@@ -72,7 +67,7 @@ bool Lexier:: startParseTokens(){
 		
 		// splite by tab and white space
 		tokenPtr = strtok(tokenPtr, " \t");
-		
+			
 		// whike has next token
 		while( tokenPtr != NULL ){
 				string token = tokenPtr;
@@ -84,9 +79,11 @@ bool Lexier:: startParseTokens(){
 				}
 			
 				//is comment (no nedd to print)
-				if( tokenCategory.compare("<Comment>") == 0 ){
-					tokenPtr = strtok(NULL, " \t");
-					continue;
+				if( tokenCategory.compare("Comment") == 0 ){
+					while ( tokenPtr != NULL ){
+						tokenPtr = strtok(NULL, " \t");
+					}
+					break;
 				}
 		
 				// reduce '\s' to ' '
@@ -94,7 +91,7 @@ bool Lexier:: startParseTokens(){
 					token = "\' \'";
 				}
 				// output the lexier result
-				output << left <<  "\t"     <<  setw(13) << tokenCategory << ": " << tokenPtr << endl; 
+				output << left <<  "\t"     << setw(16) << "<" + tokenCategory + ">" << ":"  << tokenPtr << endl; 
 			
 				//save result
 				token_list.push_back( new Token(token, tokenCategory, line_number) );
@@ -110,11 +107,6 @@ bool Lexier:: startParseTokens(){
 }
 
 
-vector<Token*> Lexier:: getTokenList(){
-	return token_list;
-}
-
-
 bool Lexier:: enter_DFA(char* token, string& tokenCategory){
 
 	//starting state
@@ -127,11 +119,12 @@ bool Lexier:: enter_DFA(char* token, string& tokenCategory){
 
 	// check state is accept or not accept
 	if( state == notAccept || state == isChar || state == waitQuote){
-		tokenCategory = "<Error>";
+		tokenCategory = "Error";
 		return false;
 	}
 	return true;
 }
+
 
 void Lexier:: startState(int& state, char next_char, string& tokenCategory){
 
@@ -140,46 +133,46 @@ void Lexier:: startState(int& state, char next_char, string& tokenCategory){
 			//operators type1
 			case '+': case '-': case '*': case '/':
 				state = isOperators1;
-				tokenCategory = "<Operator>";
+				tokenCategory = "Operator";
 				break;
 			//operators type2
 			case '=': case '!': case '>': case '<':
 				state = isOperators2;
-				tokenCategory = "<Operator>";
+				tokenCategory = "Operator";
 				break;
 			//operators type3
 			case '&':
 				state = isOperators3;
-				tokenCategory = "<Operator>";
+				tokenCategory = "Operator";
 				break;
 			//operators type4
 			case '|':
 				state = isOperators4;
-				tokenCategory = "<Operator>";
+				tokenCategory = "Operator";
 				break;
 			//char state
 			case '\'':
 				state = isChar;
-				tokenCategory = "<Char>";
+				tokenCategory = "Char";
 				break;
 			//special symbols
 			case '[': case ']': case '(': case ')': case '{': case '}': case ';': case ',':
 				state = isSymbols;
-				tokenCategory = "<Special>";
+				tokenCategory = "Special";
 				break;
 			case '_':
 				state = isIdentifier;
-				tokenCategory = "<identifier>";
+				tokenCategory = "Identifier";
 				break;
 			default:
 				// Number state
 				if ( isdigit(next_char) ){
 					state = isNumber;
-					tokenCategory = "<Number>";
+					tokenCategory = "Number";
 				}// identifier
 				else if( isalpha(next_char) ){
 					state = isIdentifier;
-					tokenCategory = "<identifier>";
+					tokenCategory = "Identifier";
 				}//
 				else{
 					state = notAccept;
@@ -225,7 +218,7 @@ void Lexier:: move(int& state, char next_char, string& tokenCategory){
 				}
 				if ( keyword_move == keyword[state].length()-1 && next_char == keyword[state][keyword_move] ){
 					state = isKeyword;
-					tokenCategory = "<Keyword>";
+					tokenCategory = "Keyword";
 				}
 				keyword_move += 1;
 				break;
@@ -234,7 +227,7 @@ void Lexier:: move(int& state, char next_char, string& tokenCategory){
 				//comment state
 				if (next_char == '/'){
 					state = isComment;
-					tokenCategory = "<Comment>";
+					tokenCategory = "Comment";
 				}
 				else{
 					state = notAccept;
@@ -319,7 +312,7 @@ ifstream& Lexier:: getInput(){
 	return inputFile;
 }
 
-ofstream& Lexier:: getOfStream(){
+ofstream& Lexier:: getOfstream(){
 
 	/* return the output stream for write the result */
     static ofstream outputFile( "output/token.txt", ios::out);
@@ -329,4 +322,8 @@ ofstream& Lexier:: getOfStream(){
 		exit(1);
 	}
 	return outputFile;
+}
+
+vector<Token*> Lexier:: getTokenList(){
+	return token_list;
 }
