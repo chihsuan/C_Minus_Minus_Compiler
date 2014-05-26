@@ -1,13 +1,16 @@
+#ifndef LEXIER_H 
+#define LEXIER_H
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <iomanip>
 #include <cstdlib>
 #include <vector>
+#include <cstring>
+#include <iomanip>
 #include "Token.h"
 
-#ifndef LEXIER_H 
-#define LEXIER_H
 
 
 using namespace std;
@@ -30,7 +33,7 @@ class Lexier{
 		void startState(int& state, char next_char, string& tokenCategory);
 		void move(int& state, char next_char, string& tokenCategory);
 		ifstream& getInput();
-		ofstream& getOfStream();
+		ofstream& getOfstream();
 };
 
 #endif

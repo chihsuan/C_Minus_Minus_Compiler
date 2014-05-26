@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <stack>
 #include <cstring>
+#include "Node.h"
 
 using namespace std;
 
@@ -20,21 +21,21 @@ class CodeGenerator{
 		CodeGenerator();
 		~CodeGenerator();
 	
-		void gernerateCode(vector<Quadruples> quadruples);
+		void gernerateCode(multimap<int, Node> parsingTree, vector<Quadruples> quadruples);
 
 	private:
 		int set_mem;
 		int count;
 		int reg;
-
-		string getReg(string symbol);
-		string getMem(string symbol);
-		vector<string> machine_code;
+		int last_reg;
 		queue<string> reg_queue;
 		map<string, int> str_reg;
-
 		map<string, int> variable_mem;
+		vector<string> machine_code;
 
+		void initMemory(multimap<int, Node> parsingTree);
+		string getReg(string symbol);
+		string getMem(string symbol);
 		string fromatCode(int count, string op, string arg1, string arg2, string arg3);
 		string toString(int integer);
 		string getOpCode(string op);

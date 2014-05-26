@@ -32,4 +32,5 @@ class InterCodeGenerator{
 		void createQuadruples(queue<Node> post_expr);
 		int priority(Node node);
 		void outputQuadruples();
+		void arrayCreate(queue<Node> post_expr);
 };
