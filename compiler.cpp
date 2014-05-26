@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
 	parser -> startParsing( lexier-> getTokenList() );
 	cout << "--parsering success!" << endl;
 	delete lexier;
-
+	
 	/* Start Semantic Analysis */
 	cout << "3.Start Semantic Analysis" << endl;
 	semantic_analyzer = new Semantic();
@@ -56,16 +56,20 @@ int main(int argc, char* argv[]){
 	cout << "--Semantic success!" << endl;
 	delete semantic_analyzer;
 		
+	cout << "4.Start InterCodeGenerator" << endl;
 	/* IC Gerneration */
 	interCodeGenerator = new InterCodeGenerator();
 	interCodeGenerator -> startGenerate( parser -> getParsingTree() );
-	delete parser;
+	cout << "--interCodeGenerator success!" << endl;
 
+	cout << "5.Start produce machine code" << endl;
 	/* Code Gerneration */
 	codeGenerator = new CodeGenerator();
- 	codeGenerator -> gernerateCode( interCodeGenerator-> getQuadruples() );
+ 	codeGenerator -> gernerateCode( parser -> getParsingTree(), interCodeGenerator-> getQuadruples());
+	cout << "--compile success!" << endl;
 	
 
+	delete parser;
 	delete interCodeGenerator;
 	delete codeGenerator;
 	return 0;
