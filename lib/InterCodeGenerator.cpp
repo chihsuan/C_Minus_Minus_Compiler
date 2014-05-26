@@ -122,8 +122,12 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 
 		// in expr block, push symbol 
 		if( ( catergory.compare("Identifier") == 0 || catergory.compare("Operator")  == 0 \
-					|| catergory.compare("Number")  == 0 || catergory.compare("ch") == 0)   && in_Expr ){
-				
+					|| catergory.compare("Number")  == 0 || catergory.compare("Char") == 0)   && in_Expr ){
+			if( catergory.compare("Char") == 0){
+				char ch = itr -> second.symbol[1];
+				itr -> second.symbol = 	toString( int(ch) );
+			}
+
 			Node push_item = (itr) -> second;
 			
 			++itr;

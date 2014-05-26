@@ -330,7 +330,7 @@ string CodeGenerator:: getOpCode(string op){
 
 		}
 		if(op.compare("&&") == 0){
-				return "OR"
+				return "OR";
 		}
 	}
 	else{
