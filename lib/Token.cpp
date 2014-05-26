@@ -1,22 +1,52 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include "Token.h"
 
 
-Token:: Token(string token, string catergory, int line_number){
-	this -> token = token;
-	this -> catergory = catergory;
-	this -> line_number = line_number;
+Token:: Token(string symbol, string catergory, int line_number)
+	:symbol(symbol),
+	 catergory(catergory),
+ 	 line_number(line_number)
+{
+	if( catergory.compare("Identifier") == 0 ){
+	  		token = "id";
+	}
+	else{
+		token = catergory;
+	}
+
 }
 
-string Token:: getToken(){
+string Token:: getSymbol(){
 	
-	return token;
+	return symbol;
 }
 
 string Token:: getCatergory(){
 	
 	return catergory;
+}
+
+
+string Token:: getToken(){
+	return token;
+}
+
+void Token:: setType(string type){
+	this-> type = type;
+}
+
+string Token:: getType(){
+	return type;
+}
+
+void Token:: setScope(int scope){
+	this -> scope = scope;
+}
+
+int Token:: getScope(){
+	return scope;
 }
 
 int Token:: getLineNumber(){
