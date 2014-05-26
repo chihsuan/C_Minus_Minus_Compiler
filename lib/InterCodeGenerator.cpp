@@ -64,11 +64,15 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 			}
 
 			Node push_item = (itr) -> second;
-			
 			// unaryOP
 			++itr;
-			if( unaryOp ){
+			if( unaryOp && symbol.compare("-") == 0 ){
 				tmp.push(Node(0, "0", "0", "Number"));
+				unaryOp = false;
+			}
+			// not op
+			else if( unaryOp && catergory.compare("Operator") != 0 ){
+				tmp.push( push_item  );
 				unaryOp = false;
 			}
 			
@@ -97,7 +101,7 @@ void InterCodeGenerator:: startGenerate(multimap<int, Node> parsingTree){
 		// if statement
 		else if( ifStmt(index, token, symbol) ){
 		}
-		else if ( token.compare("UnaryOp") == 0){
+		else if ( token.compare("UnaryOp") == 0 ){
 			unaryOp = true;
 		}
 	}
