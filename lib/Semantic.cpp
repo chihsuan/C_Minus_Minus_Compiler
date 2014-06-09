@@ -10,13 +10,18 @@ Semantic:: Semantic(){
 // build Semantic rule and analysis
 void Semantic:: analysis(multimap<int, Node> parsingTree){
 
-
 	//build Semantic rule
-
+	
 	// build symbol table check the decl vaild
 	buildSymbolTable(parsingTree);
 }
 
+/* build symbol table 
+ * input: parsing tree 
+ * output: symbol table
+ * check 1. variable not declared multiple times
+ * 		 2. variable assign or rederenced before declared
+ * */
 void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 
 	string type = "";
@@ -26,17 +31,16 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 	bool isdecl = false;
 	bool isFuncDecl = false;
 	stack<string> stream_stack;
-
+	
 	//iterator parsingTree to check what scope is and if decl vaild
 	for(multimap<int, Node>::iterator itr = parsingTree.begin(); itr != parsingTree.end(); ++ itr){
 		
 		string const & token =  itr -> second.token;
 		string symbol =  itr -> second.symbol;
 		
-		// variable is decl
+		// variable is declared insert to table
 		if( token.compare("id") == 0 && isdecl ){
 
-			isdecl = false;	
 			// insert variable to decl table to check whether it is decl
 			if( !tableInsert(stream_stack, symbol) ){
 				cout << "Error variable has already declared" << endl; 
@@ -49,18 +53,19 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 			// insert  to result
 			symbolTable.insert( make_pair(order, Symbol(symbol, token, type, scope)) );
 			stream_stack.push( symbol );
+			isdecl = false;	
 			
 		}
-		// variable is used
+		// variable is used, find if it is in table
 		else if( itr -> second.catergory.compare("Identifier") == 0 ){
-			
+
 			// to check use is vaild	
 			if( !findSymbol(stream_stack, symbol) ){
 				cout << "Error variable use before declare" << endl; 
 				exit(1);
 			}
 		}
-		// get decl type
+		// record variable type
 		else if( token.compare("Type") == 0 ){
 			isdecl = true;
 			type = symbol;
@@ -92,6 +97,8 @@ void Semantic:: buildSymbolTable(multimap<int, Node> parsingTree){
 	outputSymbolTable();
 }
 
+/* identifier assign or reference check if it is in symbol table
+ * */
 bool Semantic:: findSymbol(stack<string> input, string symbol){
 	
 	// pop and find if symbol is decl in scope
@@ -103,12 +110,13 @@ bool Semantic:: findSymbol(stack<string> input, string symbol){
 	}
 	return false;
 }
-
+/* identifier declared, insert to symbol table
+ * 
+ * */
 bool Semantic:: tableInsert(stack<string> input, string symbol ){
 
 	// pop and find if symbol is decl in scope
 	while( !input.empty() && input.top().compare("{") != 0   ){
-		
 		if(input.top().compare(symbol) == 0){
 			return false;
 		}
@@ -117,9 +125,10 @@ bool Semantic:: tableInsert(stack<string> input, string symbol ){
 	return true;
 }
 
+/*
+ * output symbol table
+ * */
 void Semantic:: outputSymbolTable(){
-
-	// output the result
 
 	ofstream outputfile("output/symbol.txt", ios:: out);
 
@@ -132,7 +141,5 @@ void Semantic:: outputSymbolTable(){
 		outputfile << left << setw(10) << itr -> second.getSymbol() << setw(3) << itr -> second.getToken() \
 				<< setw(5) <<  itr-> second.getType() << setw(3) << itr -> second.getScope() << endl;	
 	}
-	
-
 	outputfile.close();
 }
