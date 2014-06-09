@@ -1,9 +1,6 @@
-#include <iostream>
 #include "Symbol.h"
 
 using namespace std;
-
-
 
 Symbol:: Symbol(string symbol, string token, string type, int scope){
 	this -> symbol = symbol;

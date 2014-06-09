@@ -1,8 +1,4 @@
-#include <iostream>
-#include <string>
-#include <cstring>
 #include "Token.h"
-
 
 Token:: Token(string symbol, string catergory, int line_number)
 	:symbol(symbol),

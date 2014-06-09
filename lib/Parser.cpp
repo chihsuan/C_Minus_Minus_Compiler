@@ -1,49 +1,60 @@
 #include "Parser.h"
-using namespace std;
 
-
+/* constructor
+ * initial garmmar input path
+ * */
 Parser:: Parser(char* input_path){
 	inputGrammar(input_path);
 }
 
+/* destructor
+ * */
 Parser:: ~Parser(){
-	
 	vector<Nonterminal*>:: iterator itr;
 	for(itr = non_terminals.begin(); itr != non_terminals.end(); ++itr ){
 		delete *itr;
 	}
 }
 
+/* load grammar file and save as map <string, vector<list<string> > > 
+ * */
 void Parser:: inputGrammar(char* input_path){
 
 	/* inputGrammar save as map<string, vector<list<string> >> */
-	
+	Nonterminal* head;
+	string head_symbol;
+	string terminal;
+	vector<list<string> > body;
+
+	// open file
 	ifstream input_file(input_path, ios::in);
 	if( !input_file ){
 		cout << "Grammar.txt could not be opend" << endl;
 		exit(1);
 	}
 
-	Nonterminal* head;
-	string head_term;
-	vector<list<string> > body;
-
-	for (string line; getline(input_file, line); ){
+	// read input line by line
+	for ( string line; getline(input_file, line); ){
 	
 		//spilit the '\n'
 		line.substr(0, line.length()-1);
 
-		//Nonterminal
+		// is Nonterminal
 		if ( isalpha(line[0]) ){
 			if( !body.empty() ){
-				grammar.insert(make_pair(head_term, body));
+				grammar.insert(make_pair(head_symbol, body));
 			}
-			head_term = line;
-			head = new Nonterminal(line);
+			
+			head_symbol = line;
+			head = new Nonterminal( head_symbol );
+			
+			// non_terminals vector
 			non_terminals.push_back(head);
+			// non_terminals map for search
 			non_terminals_map.insert(make_pair(line, head));
 			body.clear();
-		}//terminal
+
+		}// is terminal
 		else{	
 			list<string> right_hand_side;
 
@@ -56,19 +67,24 @@ void Parser:: inputGrammar(char* input_path){
 				
 			// whike has next token
 			while( tokenPtr != NULL ){
-				string terminal = tokenPtr;
+				terminal = tokenPtr;
 				right_hand_side.push_back(terminal);
 				// get next token
 				tokenPtr = strtok(NULL, " \t");
 			}
-			delete tokenPtr;
-
+			delete [] tokenPtr;
 			body.push_back(right_hand_side);	
 		}
 	}
-	grammar.insert(make_pair(head_term, body));
+
+	// insert last production to produce grammar
+	grammar.insert(make_pair(head_symbol, body));
 }
 
+/* Parser parsing 
+ * create first follow nullable and table then parsing token
+ * finally output parsing tree
+ * */
 void Parser:: startParsing(vector<Token*> tokens){
 	
 	vector<Nonterminal*>::iterator itr;
@@ -91,10 +107,8 @@ void Parser:: startParsing(vector<Token*> tokens){
 
 	//find first
 	for( itr = non_terminals.begin(); itr!= non_terminals.end(); ++itr ){
-		(*itr) -> first = first( (*itr) -> term );		
-		set<string> tmp = (*itr) -> first;
-		for(set<string>::iterator itr2 = tmp.begin(); itr2 != tmp.end(); ++itr2 ){
-			//cout << (*itr2) << endl;
+		if ( (*itr) -> first.empty() ){
+			(*itr) -> first = first( (*itr) -> term );		
 		}
 	}
 
@@ -126,70 +140,70 @@ void Parser:: startParsing(vector<Token*> tokens){
 	
 	// output table
 	outputParingTable();
-
+	
+	// create Parsing Tree and ouput it
 	createParsingTree(tokens);
 }
 
-
+/* check is terminal or non_terminal
+ * */
 bool Parser:: isTerminal(string term){
 	return islower(term[0]) || !isalpha(term[0]) ;
 }
 
+/* build nullable
+ * */
 bool Parser:: nullable(string term){
 
-	//Nonterminal const head = non_terminal;
-	bool hasNullable = true;
 	map<string, vector<list<string> > >::iterator itr = grammar.find(term);
-	int production_null_index = 0;	
+	int production_null_index = 0; // record which production produce nullable	
+	bool isNullable = true;
 
-	// iterator or prduction
-	for(vector<list<string> >::iterator itr2 = (itr->second).begin(); itr2 != (itr-> second).end(); ++itr2 ){
+	// iterator each prduction
+	for( vector<list<string> >::iterator itr2 = (itr->second).begin(); itr2 != (itr-> second).end(); ++itr2 ){
 
 		// iterator body term
-		for(list<string>::iterator itr3 = (*itr2).begin(); itr3 != (*itr2).end(); ++itr3 ){
+		for( list<string>::iterator itr3 = (*itr2).begin(); itr3 != (*itr2).end(); ++itr3 ){
+		
+			// is nullable
 			if( (*itr3).compare("epsilon") == 0 ){
-				map<string, Nonterminal*>::iterator non_terminal = non_terminals_map.find(term);
-				non_terminal->second->production_nullable = production_null_index;
-				return true;
+				break;
 			}
-			else if( isTerminal( (*itr3) ) ){
-				hasNullable = false;
+			// is a terminal or is a nullable non_terminal
+			else if( isTerminal( (*itr3) )  || !nullable(*itr3) ){
+				isNullable = false;
 				break;
-			}//non_terminal is not nullable
-			else if(!nullable(*itr3)){
-				hasNullable = false;
-				break;
-			}//non_terminal is nullable
-			else if( (*itr3).size() == 1 ){
-				hasNullable = true;	
 			}
 		}
-	
-		if(hasNullable){
+
+		if( isNullable ){
+			// readcord which production produce nullable
 			map<string, Nonterminal*>::iterator non_terminal = non_terminals_map.find(term);
 			non_terminal->second->production_nullable = production_null_index;
 			return true;
 		}
-		else{
-			hasNullable = true;
-		}
+		
+		// reset and go to next production
+		isNullable = true;
 		production_null_index += 1;
 	}
 	return false;
 }
 
+/* build first
+ * */
 set<string> Parser:: first(string non_terminal){
 
 	set<string> first_set;
 	map<string, vector<list<string> > >::iterator itr = grammar.find(non_terminal);
+	map<string, int> terminal_production; // for parsing table
 	int productionIndex = -1;
-	map<string, int> terminal_production;
 
 	//iterator production
 	for(vector<list<string> >::iterator itr2 = (itr->second).begin(); itr2 != (itr-> second).end(); ++itr2 ){
 		productionIndex += 1;
 
-		// epsilon  continue
+		// epsilon skip
 		if( (*itr2).front().compare("epsilon") == 0 ){
 			continue;
 		}
@@ -200,69 +214,68 @@ set<string> Parser:: first(string non_terminal){
 			continue;
 		}
 		
-		// iterator body if nullable
+		// front element is non_terminal, iterator body
 		for(list<string>::iterator itr3 = (*itr2).begin(); itr3 != (*itr2).end(); ++itr3){
 			
 			// insert terminal
 			if( isTerminal(*itr3) ){
 				first_set.insert( *itr3 );
 				terminal_production.insert( make_pair( (*itr3), productionIndex ) );			
-				break;
 			}
 			else{
 				// non_terminal
 				map<string, Nonterminal*>::iterator bodyElement =  non_terminals_map.find(*itr3);
+				
 				// not Nullable then insert first of that nonterminal			
-				set<string> tmp = first(*itr3);
-				for(set<string>::iterator itr4 = tmp.begin(); itr4 != tmp.end(); ++itr4){
-				first_set.insert(*itr4);
-				terminal_production.insert( make_pair( (*itr4), productionIndex) );			
+				bodyElement -> second -> first = first(*itr3);
+				for(set<string>::iterator itr4 = bodyElement-> second -> first.begin(); \
+								itr4 != bodyElement -> second -> first.end(); ++itr4){
+					first_set.insert(*itr4);
+					terminal_production.insert( make_pair( (*itr4), productionIndex) );			
 				}
 				if( (bodyElement->second)->nullable ){
 					continue;
 				}
-				else{
-					break;
-				}
 			}
+			break;
 		}
-	}	
+	}
 
+	// insert to parsing table 
 	parsingTable.insert( make_pair(non_terminal, terminal_production) );
 	return first_set;
 }
 
 void Parser:: follow(){
 
-			bool backNull = false;
-			set<string> follow_set;
+	map<string, vector<list<string> > >:: iterator itr;	
+	bool backNull = false;
+	set<string> follow_set;
 					
-					non_terminals[0] -> follow.insert("$");
-
-					map<string, vector<list<string> > >:: iterator itr;
-					// iterator each Nonterminal production
-					for(itr = grammar.begin(); itr != grammar.end(); ++itr){
-						//iterator each production in that Nonterminal
+	non_terminals[0] -> follow.insert("$");
+	// iterator each Nonterminal production
+	for(itr = grammar.begin(); itr != grammar.end(); ++itr){
+		//iterator each production in that Nonterminal
+		follow_set.clear();
+		for(vector<list<string> >::iterator itr2 = (itr->second).begin(); itr2 != (itr-> second).end(); ++itr2 ){
+			//iterator body by reverse
+			for(list<string>::reverse_iterator itr3 = (*itr2).rbegin(); itr3 != (*itr2).rend(); ++itr3){
+						
+				if( (*itr3).compare("epsilon") == 0 ){
+						break;
+				}//terminal
+				else if( isTerminal(*itr3) ){
+					follow_set.clear();
+					follow_set.insert( *itr3 );
+				}//nonterminal
+				else{
+					map<string, Nonterminal*>::iterator non_terminal = non_terminals_map.find(*itr3);
+						
+					if( !follow_set.empty()  ){
+						non_terminal -> second -> insertFollow(follow_set);
 						follow_set.clear();
-						for(vector<list<string> >::iterator itr2 = (itr->second).begin(); itr2 != (itr-> second).end(); ++itr2 ){
-							//iterator body by reverse
-							for(list<string>::reverse_iterator itr3 = (*itr2).rbegin(); itr3 != (*itr2).rend(); ++itr3){
-								
-								if( (*itr3).compare("epsilon") == 0 ){
-									break;
-								}//terminal
-								else if( isTerminal(*itr3) ){
-									follow_set.clear();
-									follow_set.insert( *itr3 );
-								}//nonterminal
-								else{
-									map<string, Nonterminal*>::iterator non_terminal = non_terminals_map.find(*itr3);
-									
-									if( !follow_set.empty()  ){
-										non_terminal->second->insertFollow(follow_set);
-										follow_set.clear();
-									}
-									follow_set = non_terminal->second-> first;
+					}
+					follow_set = non_terminal->second-> first;
 				}
 			}		
 		}
@@ -284,10 +297,9 @@ void Parser:: follow(){
 				}
 				else{
 					map<string, Nonterminal*>::iterator non_terminal =  non_terminals_map.find(*itr3);
+					// next element is nullable or is last one 
 					if( itr3 == (*itr2).rbegin() || backNull ){
-						//cout << *itr3 << ":" << itr -> first << endl;
-						map<string, Nonterminal*>::iterator itr4 = non_terminals_map.find( itr->first );
-						non_terminal -> second -> insertFollow( (itr4->second)->follow );	
+						non_terminal -> second -> insertFollow( (*non_itr)->follow );	
 					}
 					if( non_terminal -> second -> nullable ){
 						backNull = true;
@@ -297,60 +309,122 @@ void Parser:: follow(){
 		}
 	}
 }
+/* create parsing tree
 
+ * */
+void Parser:: createParsingTree(vector<Token*> tokens){
 
+	stack<string> stateStack;	
+	stack<Token*> inputStack;
+	stateStack.push("S");
+	int treeIndex = 0;
+	string treeValue;
+	int order = 0;
+	int find_return;
 
+	// push input to a stack 
+	inputStack.push( new Token("$", "SP", 0) );
+	for(vector<Token*>::reverse_iterator itr = tokens.rbegin(); itr != tokens.rend(); ++itr ){
+		inputStack.push( (*itr) );
+	}
 
+	// loop while state stack  not empty
+	while( !stateStack.empty() ){
+
+		// preprocessing
+		if( stateStack.top().compare("@") == 0 ){
+			--treeIndex;
+			stateStack.pop();
+			continue;
+		}
+		// skip epsilon
+		if( stateStack.top().compare("epsilon") == 0){
+			stateStack.pop();
+			continue;
+		}
+		
+		treeValue = stateStack.top();
+	
+		// terminal insert to tree
+		if( isTerminal( stateStack.top() ) ){
+			parsingTree.insert( make_pair( order++ ,Node(treeIndex, treeValue, inputStack.top() -> getSymbol(), inputStack.top() -> getCatergory() ) ) );
+		}
+		// non_terminal insert to tree
+		else{
+			parsingTree.insert( make_pair( order++ ,Node(treeIndex, treeValue, inputStack.top() -> getSymbol(), " " ) ) );
+		}
+
+		// stack Pop and Push
+		if( isTerminal(stateStack.top())){
+			stateStack.pop();
+			inputStack.pop();
+		}
+		// not found in parsin table
+		else if( (find_return = findTable(stateStack.top(),  (*inputStack.top()) ) ) == -1  ){
+			cout << "Line: " << inputStack.top() -> getLineNumber() << " Parsing Error!" << endl;
+			exit(1);
+		}
+		else{
+			// reduce
+			map<string, vector<list<string> > > :: iterator itr =  grammar.find( stateStack.top() );
+			stateStack.pop();	
+		
+			treeIndex += 1;
+			// for corret tree index
+			stateStack.push("@");
+			for(list<string>:: reverse_iterator itr2 = itr->second[find_return].rbegin(); \
+							itr2 != itr->second[find_return].rend(); ++itr2 ){
+				stateStack.push( (*itr2) );
+			}
+		}
+	}
+	outputParingTree();
+}
+
+/* output file: set.txt
+ * 
+ * */
 void Parser:: outputSet(){
 	
 	vector<Nonterminal*>::iterator itr;
-	set<string>:: iterator itr2;
-
-	ofstream outputfile("output/set.txt", ios:: out);
-
-	if(!outputfile){
-		cout << "could not open outputfile set.txt" << endl;
-		exit(1);
-	}
+	ofstream& outputfile = *openFile("set.txt");
 
 	outputfile << "Nullable" << endl;
 	for( itr = non_terminals.begin(); itr!= non_terminals.end(); ++itr ){
 		outputfile << left << setw(24) << (*itr) -> term << ": "; 
-		if( (*itr)-> nullable ){
-			outputfile << "true";
-		}
-		else{
-			outputfile << "false";
-		}
-		outputfile << endl;
+		outputfile << ((*itr) -> nullable ? "true" : "false" ) << endl;
 	}
 		
 	outputfile << "First" << endl;
 	for( itr = non_terminals.begin(); itr!= non_terminals.end(); ++itr ){
-		outputfile << left << setw(24) << (*itr) -> term << ": "; 
-		for(itr2 = (*itr) -> first.begin(); itr2 != (*itr) -> first.end(); ++itr2){
-			outputfile << *itr2 << " ";
-		}
-		outputfile << endl;
+		itrSetOutput( (*itr) -> term, (*itr) -> first, outputfile);
 	}
 
 	outputfile << "Follow" << endl;
 	for( itr = non_terminals.begin(); itr!= non_terminals.end(); ++itr ){
-		outputfile << left << setw(24) << (*itr) -> term << ": "; 
-		for(itr2 = (*itr) -> follow.begin(); itr2 != (*itr) -> follow.end(); ++itr2){
-			outputfile << *itr2 << " ";
-		}
-		outputfile << endl;
+		itrSetOutput( (*itr) -> term, (*itr) -> follow, outputfile);
 	}
-
 	outputfile.close();
 }
 
+/* a function for same structue output
+ * */
+void Parser:: itrSetOutput(string symbol, set<string> output_set, ofstream& outputfile){
+	
+	outputfile << left << setw(24) << symbol << ": "; 
+	for(set<string>:: iterator itr2 = output_set.begin(); itr2 != output_set.end(); ++itr2){
+		outputfile << *itr2 << " ";
+	}
+	outputfile << endl;
+}
 
+/* output file :: LLtable.txt
+ *
+ * */
 void Parser:: outputParingTable(){
 	
-	ofstream outputfile("output/LLtable.txt", ios:: out);
-
+	ofstream& outputfile = *openFile("LLtable.txt");
+	
 	if(!outputfile){
 		cout << "could not open outputfile set.txt" << endl;
 		exit(1);
@@ -375,79 +449,11 @@ void Parser:: outputParingTable(){
 	outputfile.close();
 }
 
-void Parser:: createParsingTree(vector<Token*> tokens){
-
-	stack<string> stateStack;	
-	stack<Token*> inputStack;
-	stateStack.push("S");
-	int treeIndex = 0;
-	string treeValue;
-	int order = 0;
-
-
-	inputStack.push( new Token("$", "SP", 0) );
-	for(vector<Token*>::reverse_iterator itr = tokens.rbegin(); itr != tokens.rend(); ++itr ){
-		inputStack.push( (*itr) );
-	}
-
-
-	while( !stateStack.empty() ){
-		int find_return;
-
-		// preprocessing
-		if( stateStack.top().compare("@") == 0 ){
-			--treeIndex;
-			stateStack.pop();
-			continue;
-		}
-
-		if( stateStack.top().compare("epsilon") == 0){
-			stateStack.pop();
-			continue;
-		}
-		
-		treeValue = stateStack.top();
-		
-		if( !isupper( stateStack.top()[0] ) ){
-			parsingTree.insert( make_pair( order++ ,Node(treeIndex, treeValue, inputStack.top() -> getSymbol(), inputStack.top() -> getCatergory() ) ) );
-		}
-		else{
-			parsingTree.insert( make_pair( order++ ,Node(treeIndex, treeValue, inputStack.top() -> getSymbol(), " " ) ) );
-		}
-
-		//Pop and Push
-		if( isTerminal(stateStack.top())){
-			stateStack.pop();
-			inputStack.pop();
-		}
-		else if( (find_return = findTable(stateStack.top(),  (*inputStack.top()) ) ) == -1  ){
-			cout << "Parsing Error!" << endl;
-			exit(1);
-		}
-		else{
-			map<string, vector<list<string> > > :: iterator itr =  grammar.find( stateStack.top() );
-			stateStack.pop();	
-			
-			treeIndex += 1;
-			stateStack.push("@");
-			for(list<string>:: reverse_iterator itr2 = itr->second[find_return].rbegin(); \
-							itr2 != itr->second[find_return].rend(); ++itr2 ){
-				stateStack.push( (*itr2) );
-			}
-		}
-	}
-
-	outputParingTree();
-}
-
+/* ouput file:: tree.txt
+ * */
 void Parser:: outputParingTree(){
 	
-	ofstream outputfile("output/tree.txt", ios:: out);
-
-	if(!outputfile){
-		cout << "could not open outputfile set.txt" << endl;
-		exit(1);
-	}
+	ofstream& outputfile = *openFile("tree.txt");
 	
 	for(multimap<int, Node>::iterator itr = parsingTree.begin(); itr != parsingTree.end(); ++ itr){
 		
@@ -457,13 +463,12 @@ void Parser:: outputParingTree(){
 		}
 		outputfile << right << setw( itr-> second.index ) << itr -> second.index << " " << value << endl;	
 	}
+	outputfile.close();
 }
 
-multimap<int, Node> Parser:: getParsingTree(){
-	return parsingTree;
-}
-
-
+/*
+ * find token in table
+ * */
 int Parser:: findTable(string& non_terminal, Token& token){
 
 	map<string, map<string, int> >::iterator itr = parsingTable.find(non_terminal);
@@ -489,4 +494,25 @@ int Parser:: findTable(string& non_terminal, Token& token){
 	return itr2 -> second;
 
 }
+
+
+/*
+ * for other class or program get parsing tree
+ * */
+multimap<int, Node> Parser:: getParsingTree(){
+	return parsingTree;
+}
+/* 
+ * new output file
+ * */
+ofstream* Parser:: openFile(string file_name){
 	
+	static ofstream* outputfile;
+	outputfile = new ofstream(  ("output/" + file_name).c_str(), ios:: out);
+
+	if(!outputfile){
+		cout << "could not open outputfile set.txt" << endl;
+		exit(1);
+	}
+	return outputfile;
+}

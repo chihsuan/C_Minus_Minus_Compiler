@@ -1,47 +1,47 @@
 Line   1 :
-	<Keyword>       :int
+	<<Kerword>>     :int
 	<Identifier>    :main
 	<Special>       :(
 	<Special>       :)
 	<Special>       :{
 Line   2 :
-	<Keyword>       :int
+	<<Kerword>>     :int
 	<Identifier>    :d
 	<Special>       :;
 Line   3 :
-	<Keyword>       :int
+	<<Kerword>>     :int
 	<Identifier>    :a
 	<Special>       :;
 Line   4 :
-	<Keyword>       :int
+	<<Kerword>>     :int
 	<Identifier>    :b
 	<Special>       :;
 Line   5 :
-	<Keyword>       :int
+	<<Kerword>>     :int
 	<Identifier>    :c
 	<Special>       :;
 Line   6 :
-	<Keyword>       :int
+	<<Kerword>>     :int
 	<Identifier>    :e
 	<Special>       :[
 	<Number>        :4
 	<Special>       :]
 	<Special>       :;
 Line   7 :
-	<Keyword>       :int
+	<<Kerword>>     :int
 	<Identifier>    :f
 	<Special>       :[
 	<Number>        :3
 	<Special>       :]
 	<Special>       :;
 Line   8 :
-	<Keyword>       :char
+	<<Kerword>>     :char
 	<Identifier>    :ch
 	<Special>       :;
 Line   9 :
 	<Identifier>    :a
 	<Operator>      :=
-	<Number>        :0
+	<Number>        :2
 	<Special>       :;
 Line  10 :
 	<Identifier>    :b
@@ -54,13 +54,9 @@ Line  11 :
 	<Number>        :4
 	<Special>       :;
 Line  12 :
-	<Identifier>    :ch
-	<Operator>      :=
-	<Char>          :'a'
-	<Special>       :;
 Line  13 :
 Line  14 :
-	<Keyword>       :while
+	<<Kerword>>     :while
 	<Special>       :(
 	<Identifier>    :a
 	<Operator>      :<
@@ -69,7 +65,7 @@ Line  14 :
 	<Special>       :{
 Line  15 :
 Line  16 :
-	<Keyword>       :if
+	<<Kerword>>     :if
 	<Special>       :(
 	<Identifier>    :a
 	<Operator>      :<
@@ -88,12 +84,12 @@ Line  17 :
 	<Special>       :)
 	<Special>       :;
 Line  18 :
-	<Keyword>       :break
+	<<Kerword>>     :break
 	<Special>       :;
 Line  19 :
 	<Special>       :}
 Line  20 :
-	<Keyword>       :else
+	<<Kerword>>     :else
 	<Special>       :{
 Line  21 :
 	<Identifier>    :a
@@ -148,9 +144,15 @@ Line  28 :
 	<Special>       :;
 Line  29 :
 Line  30 :
-	<Keyword>       :return
-	<Number>        :0
+	<Identifier>    :a
+	<Operator>      :=
+	<Operator>      :!
+	<Identifier>    :a
 	<Special>       :;
 Line  31 :
-	<Special>       :}
+	<<Kerword>>     :return
+	<Number>        :0
+	<Special>       :;
 Line  32 :
+	<Special>       :}
+Line  33 :

@@ -1,8 +1,10 @@
+#ifndef CODEGENERATOR_H 
+#define CODEGENERATOR_H
+
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <vector>
-#include "Quadruples.h"
 #include <map>
 #include <set>
 #include <queue>
@@ -12,6 +14,7 @@
 #include <stack>
 #include <cstring>
 #include "Node.h"
+#include "Quadruples.h"
 
 using namespace std;
 
@@ -41,3 +44,5 @@ class CodeGenerator{
 		string getOpCode(string op);
 		void outputFile();
 };
+
+#endif

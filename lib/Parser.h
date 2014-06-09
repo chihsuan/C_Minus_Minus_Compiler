@@ -1,3 +1,6 @@
+#ifndef PARSER_H 
+#define PARSER_H
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -5,14 +8,19 @@
 #include <list>
 #include <set>
 #include <stack>
+#include <ctype.h>
+#include <vector>
+#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include "Parser.h"
 #include "Nonterminal.h"
 #include "Token.h"
 #include "Node.h"
 
 using namespace std;
 
-#ifndef PARSER_H 
-#define PARSER_H
 
 class Parser{
 	
@@ -38,8 +46,10 @@ class Parser{
 		int findTable(string& non_terminal, Token& token);
 		bool isTerminal(string term);
 		void outputSet();
+		void itrSetOutput(string symbol, set<string> output_set, ofstream& outputfile);
 		void outputParingTable();
 		void outputParingTree();
+		ofstream* openFile(string file_name);
 };
 
 #endif

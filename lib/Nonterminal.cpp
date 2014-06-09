@@ -1,7 +1,4 @@
-#include <iostream>
-#include <string>
 #include "Nonterminal.h"
-#include <set>
 using namespace std;
 
 Nonterminal:: Nonterminal(string term)

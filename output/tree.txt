@@ -68,7 +68,7 @@
         10 =
         10 Expr
          11 Primary
-          12 0
+          12 2
          11 Expr'
         9 Expr'
        8 ;
@@ -101,140 +101,147 @@
          11 StmtListCont
           12 StmtList
            13 Stmt
+            14 while
+            14 (
             14 Expr
-             15 ch
+             15 a
              15 Exprfront
-              16 =
+             15 Expr'
+              16 BinOp
+               17 <
               16 Expr
                17 Primary
-                18 'a'
+                18 20
                17 Expr'
-             15 Expr'
-            14 ;
+              16 Expr'
+            14 )
+            14 Stmt
+             15 Block
+              16 {
+              16 VarDeclList
+              16 StmtList
+               17 Stmt
+                18 if
+                18 (
+                18 Expr
+                 19 a
+                 19 Exprfront
+                 19 Expr'
+                  20 BinOp
+                   21 <
+                  20 Expr
+                   21 Primary
+                    22 0
+                   21 Expr'
+                  20 Expr'
+                18 )
+                18 Stmt
+                 19 Block
+                  20 {
+                  20 VarDeclList
+                  20 StmtList
+                   21 Stmt
+                    22 Expr
+                     23 a
+                     23 Exprfront
+                      24 =
+                      24 Expr
+                       25 a
+                       25 Exprfront
+                       25 Expr'
+                        26 Addop
+                         27 +
+                        26 Expr
+                         27 Primary
+                          28 (
+                          28 Expr
+                           29 Primary
+                            30 4
+                           29 Expr'
+                            30 Addop
+                             31 +
+                            30 Expr
+                             31 Primary
+                              32 5
+                             31 Expr'
+                            30 Expr'
+                          28 )
+                         27 Expr'
+                        26 Expr'
+                     23 Expr'
+                    22 ;
+                   21 StmtListCont
+                    22 StmtList
+                     23 Stmt
+                      24 break
+                      24 ;
+                     23 StmtListCont
+                  20 }
+                18 else
+                18 Stmt
+                 19 Block
+                  20 {
+                  20 VarDeclList
+                  20 StmtList
+                   21 Stmt
+                    22 Expr
+                     23 a
+                     23 Exprfront
+                      24 =
+                      24 Expr
+                       25 a
+                       25 Exprfront
+                       25 Expr'
+                        26 Addop
+                         27 +
+                        26 Expr
+                         27 Primary
+                          28 1
+                         27 Expr'
+                        26 Expr'
+                     23 Expr'
+                    22 ;
+                   21 StmtListCont
+                  20 }
+               17 StmtListCont
+              16 }
            13 StmtListCont
             14 StmtList
              15 Stmt
-              16 while
-              16 (
               16 Expr
                17 a
                17 Exprfront
-               17 Expr'
-                18 BinOp
-                 19 <
+                18 =
                 18 Expr
-                 19 Primary
-                  20 20
+                 19 a
+                 19 Exprfront
                  19 Expr'
-                18 Expr'
-              16 )
-              16 Stmt
-               17 Block
-                18 {
-                18 VarDeclList
-                18 StmtList
-                 19 Stmt
-                  20 if
-                  20 (
+                  20 Addop
+                   21 +
                   20 Expr
-                   21 a
-                   21 Exprfront
+                   21 Primary
+                    22 1
                    21 Expr'
-                    22 BinOp
-                     23 <
-                    22 Expr
-                     23 Primary
-                      24 0
-                     23 Expr'
-                    22 Expr'
-                  20 )
-                  20 Stmt
-                   21 Block
-                    22 {
-                    22 VarDeclList
-                    22 StmtList
-                     23 Stmt
-                      24 Expr
-                       25 a
-                       25 Exprfront
-                        26 =
-                        26 Expr
-                         27 a
-                         27 Exprfront
-                         27 Expr'
-                          28 Addop
-                           29 +
-                          28 Expr
-                           29 Primary
-                            30 (
-                            30 Expr
-                             31 Primary
-                              32 4
-                             31 Expr'
-                              32 Addop
-                               33 +
-                              32 Expr
-                               33 Primary
-                                34 5
-                               33 Expr'
-                              32 Expr'
-                            30 )
-                           29 Expr'
-                          28 Expr'
-                       25 Expr'
-                      24 ;
-                     23 StmtListCont
-                      24 StmtList
-                       25 Stmt
-                        26 break
-                        26 ;
-                       25 StmtListCont
-                    22 }
-                  20 else
-                  20 Stmt
-                   21 Block
-                    22 {
-                    22 VarDeclList
-                    22 StmtList
-                     23 Stmt
-                      24 Expr
-                       25 a
-                       25 Exprfront
-                        26 =
-                        26 Expr
-                         27 a
-                         27 Exprfront
-                         27 Expr'
-                          28 Addop
-                           29 +
-                          28 Expr
-                           29 Primary
-                            30 1
-                           29 Expr'
-                          28 Expr'
-                       25 Expr'
-                      24 ;
-                     23 StmtListCont
-                    22 }
-                 19 StmtListCont
-                18 }
+                  20 Expr'
+               17 Expr'
+              16 ;
              15 StmtListCont
               16 StmtList
                17 Stmt
                 18 Expr
-                 19 a
+                 19 f
                  19 Exprfront
-                  20 =
+                  20 [
                   20 Expr
-                   21 a
-                   21 Exprfront
+                   21 Primary
+                    22 1
                    21 Expr'
-                    22 Addop
-                     23 +
-                    22 Expr
-                     23 Primary
-                      24 1
-                     23 Expr'
+                  20 ]
+                  20 Exprfront'
+                   21 =
+                   21 Expr
+                    22 Primary
+                     23 5
                     22 Expr'
                  19 Expr'
                 18 ;
@@ -247,14 +254,14 @@
                     22 [
                     22 Expr
                      23 Primary
-                      24 1
+                      24 2
                      23 Expr'
                     22 ]
                     22 Exprfront'
                      23 =
                      23 Expr
                       24 Primary
-                       25 5
+                       25 3
                       24 Expr'
                    21 Expr'
                   20 ;
@@ -267,56 +274,53 @@
                       24 [
                       24 Expr
                        25 Primary
-                        26 2
+                        26 1
                        25 Expr'
                       24 ]
                       24 Exprfront'
                        25 =
                        25 Expr
-                        26 Primary
-                         27 3
+                        26 f
+                        26 Exprfront
+                         27 [
+                         27 Expr
+                          28 Primary
+                           29 1
+                          28 Expr'
+                         27 ]
+                         27 Exprfront'
                         26 Expr'
-                     23 Expr'
-                    22 ;
-                   21 StmtListCont
-                    22 StmtList
-                     23 Stmt
-                      24 Expr
-                       25 f
-                       25 Exprfront
-                        26 [
-                        26 Expr
-                         27 Primary
-                          28 1
-                         27 Expr'
-                        26 ]
-                        26 Exprfront'
-                         27 =
+                         27 Addop
+                          28 +
                          27 Expr
                           28 f
                           28 Exprfront
                            29 [
                            29 Expr
                             30 Primary
-                             31 1
+                             31 2
                             30 Expr'
                            29 ]
                            29 Exprfront'
                           28 Expr'
-                           29 Addop
-                            30 +
-                           29 Expr
-                            30 f
-                            30 Exprfront
-                             31 [
-                             31 Expr
-                              32 Primary
-                               33 2
-                              32 Expr'
-                             31 ]
-                             31 Exprfront'
-                            30 Expr'
-                           29 Expr'
+                         27 Expr'
+                     23 Expr'
+                    22 ;
+                   21 StmtListCont
+                    22 StmtList
+                     23 Stmt
+                      24 Expr
+                       25 a
+                       25 Exprfront
+                        26 =
+                        26 Expr
+                         27 UnaryOp
+                          28 !
+                         27 Expr
+                          28 a
+                          28 Exprfront
+                          28 Expr'
+                         27 Expr'
                        25 Expr'
                       24 ;
                      23 StmtListCont

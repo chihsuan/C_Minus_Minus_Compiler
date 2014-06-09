@@ -1,32 +1,21 @@
 int main ( ) {
 
 	int a ; 
-	char b ; 
-	char c ; 
+	int b ; 
+	int c ; 
+	a = 0 ; 
+  	b = 1 ; 
+  	c = 4 ; 
 	a = b + c ; 
-	b = a ;
+	b = a * c ; 
+	a = 12 ; 
+
+	while ( a > 10 ) {
+		a = a - 1 ; 
+	} 
+
+	a = a + 1 ; 
 
 	return 0 ;
 }
-
-int ddd ( ) {
-
-	int i ;
-	int e ; 
-
-	{    
-		{	
-			int d ; 
-			d = 2 ; 
-		} 
-		{   int e ; 
-			int e ; 
-			i = 3 ;
-		} 
-	} 
-
-	i = 5 ; 
-	return 2 ;
-}
-
 

@@ -20,7 +20,7 @@ Symbol.o: lib/Symbol.cpp lib/Symbol.h
 	g++ -c lib/Symbol.cpp
 Quadruples.o: lib/Quadruples.cpp lib/Quadruples.h
 	g++ -c lib/Quadruples.cpp
-CodeGenerator.o: lib/CodeGenerator.cpp lib/CodeGenerator.h
+CodeGenerator.o: lib/CodeGenerator.cpp lib/CodeGenerator.h lib/Quadruples.h
 	g++ -c lib/CodeGenerator.cpp
 clean:
 	rm compiler *.o

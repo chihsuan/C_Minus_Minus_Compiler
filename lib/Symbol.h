@@ -1,10 +1,9 @@
-#include <iostream>
-#include <string>
-
-using namespace std;
-
 #ifndef SYMBOL_H 
 #define SYMBOL_H
+
+#include <iostream>
+#include <string>
+using namespace std;
 
 class Symbol{
 
@@ -23,5 +22,4 @@ class Symbol{
 		int scope;
 
 };
-
 #endif

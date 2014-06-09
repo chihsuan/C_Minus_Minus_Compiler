@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Semantic.h"
 
 using namespace std;

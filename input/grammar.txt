@@ -58,7 +58,10 @@ Expr'
 Exprfront
 	( ExprList )
 	= Expr
-	[ Expr ]
+	[ Expr ] Exprfront'
+	epsilon
+Exprfront'
+	= Expr
 	epsilon
 Primary
 	ch
