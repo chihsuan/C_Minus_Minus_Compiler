@@ -39,8 +39,13 @@ int main(int argc, char* argv[]){
 	/* Start Lexial Analysis */
 	cout << "1.Start Lexial Analysis" << endl;	
 	lexier = new Lexier(argv[1]);
-	lexier -> startParseTokens();
-	cout << "--Lexial Analysis success!" << endl;
+	if (lexier -> startParseTokens()){
+		cout << "--Lexial Analysis success!" << endl;
+	}
+	else{
+		cout << "Lexier Analysis error." << endl;
+		exit(1);
+	}
 
 	/* Start Syntax Analysis */
 	cout << "2.Start Syntax Analysis" << endl;

@@ -12,7 +12,6 @@
 #include "Token.h"
 
 
-
 using namespace std;
 
 class Lexier{
@@ -29,7 +28,7 @@ class Lexier{
 		int keyword_move;
 		int state;
 
-	    bool enter_DFA(char* token, string& tokenCategory);
+	    bool enter_DFA(string token, string& tokenCategory);
 		void startState(int& state, char next_char, string& tokenCategory);
 		void move(int& state, char next_char, string& tokenCategory);
 		ifstream& getInput();
